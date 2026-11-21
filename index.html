@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Учет склада</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0 auto; padding: 16px; max-width: 600px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f5f7; color: #1a1d23; font-size: 15px; line-height: 1.4;
+  }
+  h1 { font-size: 22px; margin: 8px 0 16px; display: flex; align-items: center; gap: 8px; }
+  
+  .tabs {
+    display: flex; gap: 6px; margin-bottom: 20px;
+    background: #e6e8ec; padding: 4px; border-radius: 12px;
+  }
+  .tab {
+    flex: 1; padding: 10px; text-align: center; border: none;
+    background: transparent; border-radius: 9px; font-size: 14px;
+    font-weight: 600; color: #6b7280; cursor: pointer; transition: 0.2s;
+  }
+  .tab.active { background: #ffffff; color: #1a1d23; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .total-card {
+    background: linear-gradient(135deg, #4f8cff, #3b6fdb);
+    color: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(79, 140, 255, 0.25);
+  }
+  .total-card .label { font-size: 13px; opacity: 0.9; margin-bottom: 6px; font-weight: 500; }
+  .total-card .value { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
+  
+  .total-card.purchase { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
+
+  .form-box {
+    background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .form-grid .full { grid-column: 1 / -1; }
+  label { font-size: 12px; color: #6b7280; display: block; margin-bottom: 4px; font-weight: 500;}
+  
+  input {
+    width: 100%; padding: 12px; border: 1px solid #d1d5db;
+    border-radius: 10px; font-size: 15px; background: #f9fafb; transition: 0.2s;
+  }
+  input:focus { outline: none; border-color: #4f8cff; background: #fff; box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1); }
+  
+  button {
+    background: #4f8cff; color: #fff; border: none; padding: 12px 16px;
+    border-radius: 10px; font-size: 15px; font-weight: 600;
+    cursor: pointer; width: 100%; transition: 0.2s;
+  }
+  button:hover { opacity: 0.9; }
+  button:active { transform: scale(0.98); }
+  button.secondary { background: #fff; color: #4f8cff; border: 1px solid #d1d5db; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  button.secondary:hover { background: #f9fafb; }
+
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .row {
+    background: #fff; border-radius: 12px; padding: 14px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05); border: 1px solid transparent;
+  }
+  .row:hover { border-color: #e5e7eb; }
+  .row .info { flex: 1; min-width: 0; }
+  .row .name { font-weight: 600; font-size: 15px; word-break: break-word; }
+  .row .detail { font-size: 13px; color: #6b7280; margin-top: 4px; }
+  .row .sum { font-weight: 700; font-size: 16px; white-space: nowrap; }
+  
+  .row .del {
+    background: transparent; color: #ef4444; border: none;
+    font-size: 22px; line-height: 1; padding: 4px 8px; width: auto; cursor: pointer;
+  }
+  .row .del:hover { background: #fee2e2; border-radius: 8px; }
+
+  .empty {
+    text-align: center; color: #9ca3af; padding: 32px 16px;
+    font-size: 14px; background: #fff; border-radius: 12px;
+    border: 1px dashed #d1d5db;
+  }
+  .note { font-size: 12px; color: #6b7280; margin-top: 12px; text-align: center; }
+  .loader { text-align: center; padding: 30px; color: #4f8cff; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<h1>📦 Учет склада</h1>
+
+<div class="tabs">
+  <button class="tab active" data-tab="stock">Склад</button>
+  <button class="tab" data-tab="purchase">Закупка</button>
+</div>
+
+<!-- ВКЛАДКА: СКЛАД -->
+<div class="panel active" id="panel-stock">
+  <div class="total-card">
+    <div class="label">Текущая стоимость склада</div>
+    <div class="value" id="stock-total">—</div>
+  </div>
+
+  <div class="form-box" style="padding: 12px; display: flex; gap: 10px; align-items: center; justify-content: space-between;">
+    <div style="font-size: 13px; color: #6b7280; flex: 1;">Данные берутся из вашего бота через Cloudflare Worker.</div>
+    <button class="secondary" id="reload-btn" style="width: auto; padding: 8px 16px; font-size: 14px;">Обновить</button>
+  </div>
+
+  <div class="list" id="stock-list">
+    <div class="loader">Загрузка данных...</div>
+  </div>
+</div>
+
+<!-- ВКЛАДКА: ЗАКУПКА -->
+<div class="panel" id="panel-purchase">
+  <div class="total-card purchase">
+    <div class="label">Потенциальная стоимость закупки</div>
+    <div class="value" id="purchase-total">0 ₽</div>
+  </div>
+
+  <div class="form-box">
+    <div class="form-grid">
+      <div class="full">
+        <label>Название товара</label>
+        <input type="text" id="purchase-name" placeholder="Например, Чехол iPhone 15">
+      </div>
+      <div>
+        <label>Цена закупки, ₽</label>
+        <input type="number" id="purchase-price" placeholder="0" inputmode="numeric" min="0">
+      </div>
+      <div>
+        <label>Количество, шт</label>
+        <input type="number" id="purchase-qty" placeholder="0" inputmode="numeric" min="0">
+      </div>
+    </div>
+    <button id="purchase-add">Добавить в план</button>
+  </div>
+
+  <div class="list" id="purchase-list"></div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // URL вашего воркера
+  const WORKER_URL = 'https://pf-store-orders.vegnette.workers.dev/api/stock';
+  const PURCHASE_KEY = 'pf_purchase_plan_v1';
+
+  const num = v => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
+  const fmt = n => (Number(n) || 0).toLocaleString('ru-RU') + ' ₽';
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+  let stockItems = [];
+  let purchase = [];
+
+  // --- Логика Склада ---
+  async function loadStock() {
+    document.getElementById('stock-total').textContent = '...';
+    document.getElementById('stock-list').innerHTML = '<div class="loader">Загрузка из бота...</div>';
+    
+    try {
+      const res = await fetch(WORKER_URL + '?t=' + Date.now());
+      if (!res.ok) throw new Error('Ошибка сервера: ' + res.status);
+      const data = await res.json();
+      
+      if (data.error) throw new Error(data.error);
+      if (!Array.isArray(data)) throw new Error('Неверный формат данных');
+
+      stockItems = data.map(i => ({
+        id: String(i.id ?? i.sku ?? uid()),
+        title: i.title || 'Без названия',
+        price: num(i.price),
+        stock: num(i.stock)
+      }));
+      
+      renderStock();
+    } catch (e) {
+      document.getElementById('stock-total').textContent = '—';
+      document.getElementById('stock-list').innerHTML = `
+        <div class="empty">
+          <span style="font-size: 24px; display: block; margin-bottom: 8px;">⚠️</span>
+          Ошибка загрузки: ${esc(e.message)}<br><br>
+          <span style="font-size: 12px;">Убедитесь, что в ваш Worker добавлен маршрут <code>/api/stock</code> и он задеплоен.</span>
+        </div>`;
+    }
+  }
+
+  function renderStock() {
+    const wrap = document.getElementById('stock-list');
+    if (!stockItems.length) {
+      wrap.innerHTML = '<div class="empty">Склад пуст (бот вернул пустой массив)</div>';
+      document.getElementById('stock-total').textContent = '0 ₽';
+      return;
+    }
+    
+    let total = 0;
+    wrap.innerHTML = stockItems.map(p => {
+      const sum = p.price * p.stock;
+      total += sum;
+      return `
+        <div class="row">
+          <div class="info">
+            <div class="name">${esc(p.title)}</div>
+            <div class="detail">${fmt(p.price)} × ${p.stock} шт</div>
+          </div>
+          <div class="sum">${fmt(sum)}</div>
+        </div>
+      `;
+    }).join('');
+    
+    document.getElementById('stock-total').textContent = fmt(total);
+  }
+
+  // --- Логика Закупки (ручная) ---
+  function loadPurchase() {
+    try { purchase = JSON.parse(localStorage.getItem(PURCHASE_KEY)) || []; }
+    catch (_) { purchase = []; }
+  }
+
+  function savePurchase() {
+    localStorage.setItem(PURCHASE_KEY, JSON.stringify(purchase));
+  }
+
+  function renderPurchase() {
+    const wrap = document.getElementById('purchase-list');
+    if (!purchase.length) {
+      wrap.innerHTML = '<div class="empty">План закупки пуст.<br>Добавьте товары через форму выше.</div>';
+      document.getElementById('purchase-total').textContent = '0 ₽';
+      return;
+    }
+    
+    let total = 0;
+    wrap.innerHTML = purchase.map(it => {
+      const sum = num(it.price) * num(it.qty);
+      total += sum;
+      return `
+        <div class="row" data-id="${esc(it.id)}">
+          <div class="info">
+            <div class="name">${esc(it.name)}</div>
+            <div class="detail">${fmt(it.price)} × ${it.qty} шт</div>
+          </div>
+          <div class="sum">${fmt(sum)}</div>
+          <button class="del" title="Удалить">×</button>
+        </div>
+      `;
+    }).join('');
+    
+    document.getElementById('purchase-total').textContent = fmt(total);
+  }
+
+  function addPurchase() {
+    const nameEl = document.getElementById('purchase-name');
+    const priceEl = document.getElementById('purchase-price');
+    const qtyEl = document.getElementById('purchase-qty');
+    
+    const name = nameEl.value.trim();
+    const price = num(priceEl.value);
+    const qty = Math.floor(num(qtyEl.value));
+
+    if (!name) return alert('Введите название товара');
+    if (qty <= 0) return alert('Количество должно быть больше 0');
+
+    purchase.push({ id: uid(), name, price, qty });
+    savePurchase();
+    renderPurchase();
+    
+    // Очистка полей
+    nameEl.value = '';
+    priceEl.value = '';
+    qtyEl.value = '';
+    nameEl.focus();
+  }
+
+  // --- Слушатели событий ---
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  document.getElementById('reload-btn').addEventListener('click', loadStock);
+  document.getElementById('purchase-add').addEventListener('click', addPurchase);
+  
+  // Добавление по Enter
+  document.getElementById('purchase-qty').addEventListener('keypress', e => {
+    if (e.key === 'Enter') addPurchase();
+  });
+
+  // Удаление из закупки
+  document.getElementById('purchase-list').addEventListener('click', e => {
+    const btn = e.target.closest('button.del');
+    if (!btn) return;
+    const row = btn.closest('.row');
+    purchase = purchase.filter(x => x.id !== row.dataset.id);
+    savePurchase();
+    renderPurchase();
+  });
+
+  // --- Старт ---
+  loadPurchase();
+  renderPurchase();
+  loadStock();
+})();
+</script>
+</body>
+</html>
