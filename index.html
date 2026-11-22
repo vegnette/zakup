@@ -2,380 +2,743 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Учет склада и закупок</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#080a0e">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Склад и закуп — МАРЖА</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  :root {
-    --bg: #0f1115;
-    --card: #1a1d23;
-    --text: #e8eaed;
-    --muted: #8a8f98;
-    --accent: #4f8cff;
-    --accent-hover: #3b6fdb;
-    --green: #22c55e;
-    --red: #ef4444;
-    --border: #2a2e37;
-    --input-bg: #0f1115;
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0 auto; padding: 16px; max-width: 600px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.4;
-  }
-  h1 { font-size: 22px; margin: 8px 0 16px; display: flex; align-items: center; gap: 8px; }
-  
-  .tabs {
-    display: flex; gap: 6px; margin-bottom: 20px;
-    background: #000; padding: 4px; border-radius: 12px;
-  }
-  .tab {
-    flex: 1; padding: 10px; text-align: center; border: none;
-    background: transparent; border-radius: 9px; font-size: 14px;
-    font-weight: 600; color: var(--muted); cursor: pointer; transition: 0.2s;
-  }
-  .tab.active { background: var(--card); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.2); }
-  
-  .panel { display: none; animation: fadeIn 0.3s ease; }
-  .panel.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080a0e;
+  --card:#12161d;
+  --card2:#161b23;
+  --border:#242c37;
+  --border-soft:#1b222c;
+  --text:#e9eef6;
+  --muted:#8b97a8;
+  --muted2:#66748a;
+  --green:#4ade80;
+  --green-deep:#22c55e;
+  --red:#fb7185;
+  --blue:#60a5fa;
+  --amber:#fbbf24;
+  --radius:20px;
+  --shadow:0 18px 44px rgba(0,0,0,.34);
+  --safe-t:max(env(safe-area-inset-top,0px),var(--tg-content-safe-area-inset-top,0px));
+  --safe-b:max(env(safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px));
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;min-height:100dvh;color:var(--text);background:var(--bg);
+  font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(900px 520px at 12% -12%,rgba(74,222,128,.10),transparent 62%),
+    radial-gradient(760px 500px at 96% -8%,rgba(96,165,250,.08),transparent 62%),
+    radial-gradient(680px 480px at 50% 112%,rgba(74,222,128,.04),transparent 65%);
+}
+::selection{background:rgba(74,222,128,.26)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#222b37;border-radius:10px;border:2px solid var(--bg)}
+::-webkit-scrollbar-track{background:transparent}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
 
-  .total-card {
-    background: var(--card); border: 1px solid var(--border);
-    color: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px;
-  }
-  .total-card .label { font-size: 13px; opacity: 0.8; margin-bottom: 6px; font-weight: 500; }
-  .total-card .value { font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }
-  
-  .total-card.purchase { border-left: 4px solid var(--accent); }
-  .total-card.stock { border-left: 4px solid var(--green); }
+.app{width:100%;max-width:680px;margin:0 auto;padding:0 16px}
 
-  .form-box {
-    background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 20px;
-    border: 1px solid var(--border);
-  }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .form-grid .full { grid-column: 1 / -1; }
-  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; font-weight: 500;}
-  
-  input {
-    width: 100%; padding: 12px; border: 1px solid var(--border);
-    border-radius: 10px; font-size: 15px; background: var(--input-bg); color: var(--text); transition: 0.2s;
-  }
-  input:focus { outline: none; border-color: var(--accent); }
-  
-  button {
-    background: var(--accent); color: #fff; border: none; padding: 12px 16px;
-    border-radius: 10px; font-size: 15px; font-weight: 600;
-    cursor: pointer; width: 100%; transition: 0.2s;
-  }
-  button:hover { background: var(--accent-hover); }
-  button:active { transform: scale(0.98); }
-  button.secondary { background: var(--card); color: var(--accent); border: 1px solid var(--border); }
-  button.secondary:hover { background: #2a2e37; }
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(10px + var(--safe-t)) 2px 14px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.mark{
+  width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none;
+  font-weight:800;font-size:18px;color:#04120a;
+  background:linear-gradient(140deg,#86efac,#34d399 55%,#22d3ee);
+  box-shadow:0 8px 24px rgba(52,211,153,.26);
+}
+.brand b{display:block;font-size:15px;letter-spacing:.13em;line-height:1.2}
+.brand span{display:block;font-size:10.5px;color:var(--muted2);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.top-actions{display:flex;align-items:center;gap:9px;flex:none}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(74,222,128,.12);transition:.2s}
+.sync-dot.stale{background:var(--amber);box-shadow:0 0 0 3px rgba(251,191,36,.12)}
+.icon-btn{
+  width:38px;height:38px;border-radius:12px;border:1px solid var(--border);background:#0d1117;
+  color:#9fb0c4;display:grid;place-items:center;transition:.16s;
+}
+.icon-btn:hover{color:var(--green);border-color:rgba(74,222,128,.35);background:#0f151c}
+.icon-btn:active{transform:scale(.96)}
+.icon-btn.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  .list { display: flex; flex-direction: column; gap: 8px; }
-  .row {
-    background: var(--card); border-radius: 12px; padding: 14px;
-    display: flex; align-items: center; gap: 12px;
-    border: 1px solid var(--border);
-  }
-  .row .info { flex: 1; min-width: 0; }
-  .row .name { font-weight: 600; font-size: 15px; word-break: break-word; }
-  .row .detail { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .row .sum { font-weight: 700; font-size: 16px; white-space: nowrap; }
-  
-  .row .del {
-    background: transparent; color: var(--red); border: none;
-    font-size: 22px; line-height: 1; padding: 4px 8px; width: auto; cursor: pointer;
-  }
-  .row .del:hover { background: rgba(239, 68, 68, 0.1); border-radius: 8px; }
+/* ---------- tabs ---------- */
+.tabs{
+  position:sticky;top:0;z-index:30;display:flex;gap:6px;padding:5px;margin-bottom:16px;
+  background:rgba(8,10,14,.84);border:1px solid var(--border-soft);border-radius:15px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.tab{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 8px;border:0;border-radius:11px;background:transparent;color:var(--muted);
+  font-size:14px;font-weight:650;transition:.18s;
+}
+.tab svg{width:16px;height:16px;opacity:.9}
+.tab:hover{color:#cfdae8}
+.tab.active{
+  color:#eaf4ff;background:linear-gradient(180deg,#1b222c,#141a22);
+  box-shadow:0 5px 16px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.tab.active svg{color:var(--green)}
 
-  .empty {
-    text-align: center; color: var(--muted); padding: 32px 16px;
-    font-size: 14px; background: var(--card); border-radius: 12px;
-    border: 1px dashed var(--border);
-  }
-  .note { font-size: 12px; color: var(--muted); margin-top: 12px; text-align: center; }
-  .loader { text-align: center; padding: 30px; color: var(--accent); font-weight: 500; }
-  
-  /* Бейджи прибыли */
-  .badge {
-    display: inline-block; padding: 2px 6px; border-radius: 4px;
-    font-size: 11px; font-weight: 700; margin-left: 6px;
-  }
-  .badge.green { background: rgba(34, 197, 94, 0.15); color: var(--green); }
-  .badge.red { background: rgba(239, 68, 68, 0.15); color: var(--red); }
-  .badge.muted { background: rgba(255, 255, 255, 0.1); color: var(--muted); }
+/* ---------- panels ---------- */
+.panel{display:none}
+.panel.active{display:block;animation:fade .24s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- hero ---------- */
+.hero{
+  position:relative;overflow:hidden;padding:18px;margin-bottom:12px;border-radius:22px;
+  border:1px solid var(--border);background:linear-gradient(160deg,#161c25,#0f1319 68%);
+  box-shadow:var(--shadow);
+}
+.hero::after{
+  content:"";position:absolute;right:-70px;top:-90px;width:230px;height:230px;border-radius:50%;
+  background:radial-gradient(circle,rgba(74,222,128,.17),transparent 70%);pointer-events:none;
+}
+.hero.purchase::after{background:radial-gradient(circle,rgba(96,165,250,.15),transparent 70%)}
+.hero-top{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.live{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#86efac;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.16);padding:3px 7px;border-radius:999px;letter-spacing:0;text-transform:none}
+.live i{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(74,222,128,.12)}
+.pill{font-size:10.5px;color:#b9c6d6;background:rgba(255,255,255,.04);border:1px solid var(--border-soft);padding:3px 8px;border-radius:999px;letter-spacing:0;text-transform:none}
+.hero-value{
+  position:relative;margin:11px 0 4px;font-size:38px;line-height:1.05;font-weight:750;
+  letter-spacing:-.035em;font-variant-numeric:tabular-nums;
+}
+.hero-value.green{color:var(--green)}
+.hero-value.red{color:var(--red)}
+.hero-sub{position:relative;font-size:12.5px;color:var(--muted);line-height:1.45}
+.hero-chips{position:relative;display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.chip-stat{font-size:11px;color:#b9c6d6;background:rgba(255,255,255,.04);border:1px solid var(--border-soft);padding:4px 8px;border-radius:999px}
+.chip-stat b{color:#e9eef6;font-weight:650}
+.chip-stat.warn{color:#fcd34d;background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.15)}
+.chip-stat.warn b{color:#fcd34d}
+.stat-grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border-soft)}
+.stat-grid span{display:block;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.stat-grid b{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums}
+
+/* ---------- hint ---------- */
+.hint{font-size:11.5px;color:var(--muted2);line-height:1.55;margin:0 2px 14px}
+
+/* ---------- list ---------- */
+.list{display:flex;flex-direction:column;gap:9px}
+.row{
+  display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;
+  border:1px solid var(--border);background:linear-gradient(180deg,var(--card2),var(--card));
+  transition:border-color .16s,transform .16s;
+}
+.row:hover{border-color:#303a49}
+.row.out{opacity:.55}
+.thumb{
+  width:52px;height:52px;border-radius:13px;flex:none;border:1px solid var(--border-soft);
+  background:linear-gradient(140deg,#1b2330,#10141a) center/cover no-repeat;
+}
+.info{flex:1;min-width:0}
+.name{font-size:14px;font-weight:650;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail{font-size:12px;color:var(--muted);margin-top:4px;font-variant-numeric:tabular-nums}
+.detail s{color:#5d6a7c}
+.right{text-align:right;flex:none}
+.sum{font-size:15px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;margin-top:5px;padding:2px 7px;border-radius:999px;font-size:10.5px;font-weight:650;background:rgba(74,222,128,.10);color:#86efac;border:1px solid rgba(74,222,128,.18)}
+.badge.zero{background:rgba(251,113,133,.10);color:#fda4af;border-color:rgba(251,113,133,.18)}
+.badge.one{background:rgba(251,191,36,.10);color:#fcd34d;border-color:rgba(251,191,36,.18)}
+.mini-add{
+  flex:none;width:30px;height:30px;border-radius:10px;border:1px solid var(--border);
+  background:#0b0e13;color:var(--muted);font-size:18px;line-height:1;display:grid;place-items:center;transition:.16s;
+}
+.mini-add:hover{color:#04120a;background:var(--green);border-color:var(--green)}
+.mini-add:active{transform:scale(.94)}
+
+/* ---------- form ---------- */
+.card{padding:15px;margin-bottom:14px;border-radius:18px;border:1px solid var(--border);background:linear-gradient(180deg,var(--card2),var(--card))}
+.card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-head b{font-size:14px}
+.card-head span{font-size:11px;color:var(--muted2)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-grid .full{grid-column:1/-1}
+label span{display:block;font-size:11px;color:var(--muted2);margin:0 0 5px 2px;font-weight:550}
+input{
+  width:100%;padding:12px 13px;border-radius:12px;border:1px solid var(--border);
+  background:#0b0e13;color:var(--text);font-size:15px;outline:none;transition:.16s;
+}
+input:focus{border-color:rgba(74,222,128,.55);box-shadow:0 0 0 3px rgba(74,222,128,.10)}
+input::placeholder{color:#4d5a6c}
+.preview{
+  margin:11px 0;padding:10px 12px;border-radius:12px;border:1px dashed var(--border);
+  background:#0b0e13;font-size:12px;color:var(--muted);line-height:1.55;font-variant-numeric:tabular-nums;
+}
+.preview b{color:var(--text)}
+.preview .pos{color:var(--green)}
+.preview .neg{color:var(--red)}
+.btn{width:100%;border:0;border-radius:13px;padding:13px 16px;font-size:14.5px;font-weight:700;transition:.16s}
+.btn.primary{background:linear-gradient(140deg,#86efac,#34d399 55%,#22c55e);color:#04120a;box-shadow:0 10px 24px rgba(34,197,94,.18)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.primary:active{transform:scale(.985)}
+.btn.ghost{width:auto;padding:7px 11px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;border-radius:10px}
+.btn.ghost:hover{color:#e9eef6;border-color:#354150}
+.formula{margin-top:11px;font-size:11px;line-height:1.55;color:var(--muted2);text-align:center}
+
+/* ---------- plan ---------- */
+.section-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 2px 10px}
+.section-row b{font-size:14px}
+.plan-row .profit{font-size:16px;font-weight:750;color:var(--green);font-variant-numeric:tabular-nums}
+.plan-row .profit.neg{color:var(--red)}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.tag{font-size:10.5px;padding:3px 7px;border-radius:7px;background:#0b0e13;border:1px solid var(--border-soft);color:var(--muted);white-space:nowrap}
+.tag.green{color:#86efac;background:rgba(74,222,128,.07);border-color:rgba(74,222,128,.14)}
+.del{
+  flex:none;width:30px;height:30px;border-radius:9px;border:1px solid transparent;background:transparent;
+  color:var(--red);font-size:20px;line-height:1;display:grid;place-items:center;transition:.16s;
+}
+.del:hover{background:rgba(251,113,133,.10);border-color:rgba(251,113,133,.18)}
+
+/* ---------- empty / skeleton ---------- */
+.empty{padding:34px 18px;border:1px dashed var(--border);border-radius:18px;background:rgba(18,22,29,.5);color:var(--muted);text-align:center}
+.empty .ico{font-size:26px;line-height:1;margin-bottom:9px;opacity:.85}
+.empty b{display:block;font-size:14px;color:#c9d5e4;margin-bottom:5px}
+.empty span{display:block;font-size:12px;line-height:1.55}
+.skel{
+  height:78px;border-radius:16px;
+  background:linear-gradient(90deg,#12161d 25%,#181e27 37%,#12161d 63%);
+  background-size:400% 100%;animation:sh 1.2s ease infinite;
+}
+@keyframes sh{0%{background-position:100% 0}100%{background-position:0 0}}
+
+/* ---------- footer / toast ---------- */
+.foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 2px calc(24px + var(--safe-b));font-size:11px;color:var(--muted2)}
+.foot a{color:var(--muted);text-decoration:none;transition:.15s}
+.foot a:hover{color:var(--green)}
+.toast{
+  position:fixed;left:50%;bottom:calc(22px + var(--safe-b));z-index:100;
+  padding:10px 16px;border-radius:12px;border:1px solid var(--border);
+  background:#1a2029;color:#e9eef6;font-size:13px;white-space:nowrap;
+  box-shadow:0 14px 34px rgba(0,0,0,.42);
+  opacity:0;pointer-events:none;transform:translate(-50%,16px);transition:.24s;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:380px){
+  .hero-value{font-size:33px}
+  .form-grid{grid-template-columns:1fr}
+  .form-grid .full{grid-column:auto}
+  .thumb{width:46px;height:46px}
+  .row{gap:10px;padding:11px}
+  .mini-add{width:28px;height:28px}
+}
+@media (min-width:720px){
+  .app{padding:0 20px}
+  .hero{padding:22px}
+  .hero-value{font-size:42px}
+}
 </style>
 </head>
 <body>
-
-<h1>📦 Учет склада</h1>
-
-<div class="tabs">
-  <button class="tab active" data-tab="stock">Склад</button>
-  <button class="tab" data-tab="purchase">Закупка</button>
-</div>
-
-<!-- ВКЛАДКА: СКЛАД -->
-<div class="panel active" id="panel-stock">
-  <div class="total-card stock">
-    <div class="label">Общая стоимость склада (по ценам продажи)</div>
-    <div class="value" id="stock-total">—</div>
-  </div>
-
-  <div class="form-box" style="padding: 12px; display: flex; gap: 10px; align-items: center; justify-content: space-between;">
-    <div style="font-size: 13px; color: var(--muted); flex: 1;">Данные из вашего Cloudflare Worker.</div>
-    <button class="secondary" id="reload-btn" style="width: auto; padding: 8px 16px; font-size: 14px;">Обновить</button>
-  </div>
-
-  <div class="list" id="stock-list">
-    <div class="loader">Загрузка данных...</div>
-  </div>
-</div>
-
-<!-- ВКЛАДКА: ЗАКУПКА -->
-<div class="panel" id="panel-purchase">
-  <div class="total-card purchase">
-    <div class="label">Планируемая закупка</div>
-    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-      <div>
-        <div style="font-size: 12px; color: var(--muted); margin-bottom: 2px;">Затраты:</div>
-        <div class="value" id="purchase-cost" style="font-size: 20px;">0 ₽</div>
-      </div>
-      <div style="text-align: right;">
-        <div style="font-size: 12px; color: var(--muted); margin-bottom: 2px;">Прибыль:</div>
-        <div class="value" id="purchase-profit" style="font-size: 20px; color: var(--green);">0 ₽</div>
-      </div>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">М</div>
+      <div><b>МАРЖА</b><span>склад · закуп</span></div>
     </div>
-  </div>
-
-  <div class="form-box">
-    <div class="form-grid">
-      <div class="full">
-        <label>Название товара</label>
-        <input type="text" id="purchase-name" placeholder="Например, Чехол iPhone 15">
-      </div>
-      <div>
-        <label>Закупка (шт)</label>
-        <input type="number" id="purchase-qty" placeholder="0" inputmode="numeric" min="1">
-      </div>
-      <div>
-        <label>Закупочная цена, ₽</label>
-        <input type="number" id="purchase-cost-price" placeholder="0" inputmode="numeric" min="0">
-      </div>
-      <div class="full">
-        <label>Розничная цена (за 1 шт), ₽</label>
-        <input type="number" id="purchase-retail-price" placeholder="0" inputmode="numeric" min="0">
-      </div>
+    <div class="top-actions">
+      <span class="sync-dot" id="syncDot" title="Данные с сайта"></span>
+      <button class="icon-btn" id="refreshBtn" aria-label="Обновить данные" title="Обновить данные">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      </button>
     </div>
-    <button id="purchase-add">Добавить в план</button>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Разделы">
+    <button class="tab active" data-tab="stock" role="tab" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>
+      Склад
+    </button>
+    <button class="tab" data-tab="purchase" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M6 6L5 3H2"/></svg>
+      Закупка
+    </button>
   </div>
 
-  <div class="list" id="purchase-list"></div>
+  <main>
+    <section class="panel active" id="panel-stock">
+      <div class="hero">
+        <div class="hero-top">
+          <span>Стоимость склада</span>
+          <span class="live"><i></i> сайт</span>
+        </div>
+        <div class="hero-value" id="stockTotal">—</div>
+        <div class="hero-sub" id="stockMeta">Загружаю остатки и цены…</div>
+        <div class="hero-chips" id="stockChips"></div>
+      </div>
+
+      <div class="hint">Сумма по текущим остаткам и ценам продажи на сайте. Данные берутся из живого API магазина, а не из старого каталога.</div>
+
+      <div class="list" id="stockList">
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-purchase">
+      <div class="hero purchase">
+        <div class="hero-top">
+          <span>Прибыль с закупки</span>
+          <span class="pill" id="planCount">пусто</span>
+        </div>
+        <div class="hero-value green" id="planProfit">0 ₽</div>
+        <div class="hero-sub" id="planSub">Одна штука с каждой позиции остаётся на витрине</div>
+        <div class="stat-grid">
+          <div><span>Вложить</span><b id="planCost">0 ₽</b></div>
+          <div><span>Выручка</span><b id="planRevenue">0 ₽</b></div>
+          <div><span>Продаём</span><b id="planSold">0 шт</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><b>Добавить в план</b><span>закупка → продажа</span></div>
+        <div class="form-grid">
+          <label class="full"><span>Товар</span>
+            <input id="pName" list="stockNames" placeholder="Например, AirPods Pro 2" autocomplete="off">
+            <datalist id="stockNames"></datalist>
+          </label>
+          <label><span>Кол-во, шт</span>
+            <input id="pQty" type="number" min="1" step="1" inputmode="numeric" placeholder="5">
+          </label>
+          <label><span>Закупка, ₽/шт</span>
+            <input id="pCost" type="number" min="0" step="10" inputmode="numeric" placeholder="1000">
+          </label>
+          <label class="full"><span>Цена продажи, ₽/шт</span>
+            <input id="pPrice" type="number" min="0" step="10" inputmode="numeric" placeholder="1500">
+          </label>
+        </div>
+        <div class="preview" id="formPreview">Укажите количество и цену — покажу прибыль.</div>
+        <button class="btn primary" id="addBtn">Добавить в план</button>
+        <div class="formula">Прибыль = (цена − закупка) × (кол-во − 1).<br>Одна штука остаётся на витрине.</div>
+      </div>
+
+      <div class="section-row">
+        <b>План закупки</b>
+        <button class="btn ghost" id="clearPlan" style="display:none">Очистить</button>
+      </div>
+      <div class="list" id="planList"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Данные магазина pf-store</span>
+    <a href="https://vegnette.github.io/pf-store/" target="_blank" rel="noopener">Открыть магазин ↗</a>
+  </footer>
 </div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 (() => {
   'use strict';
 
-  const WORKER_URL = 'https://pf-store-orders.vegnette.workers.dev/api/stock';
-  const PURCHASE_KEY = 'pf_purchase_plan_v2';
+  const STOCK_URL = 'https://pf-store-orders.vegnette.workers.dev/api/stock';
+  const STORE_URL = 'https://vegnette.github.io/pf-store/';
+  const CACHE_KEY = 'zakup_stock_v1';
+  const PLAN_KEY = 'zakup_plan_v1';
+  const FRESH_MS = 5 * 60 * 1000;
 
-  const num = v => { const n = Number(v); return Number.isFinite(n) ? n : 0; };
-  const fmt = n => (Number(n) || 0).toLocaleString('ru-RU') + ' ₽';
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const nf = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 
-  let stockItems = [];
-  let purchase = [];
+  const num = (v) => {
+    const x = Number(String(v == null ? '' : v).replace(/\s/g, '').replace(',', '.'));
+    return Number.isFinite(x) ? x : 0;
+  };
+  const fmt = (v) => nf.format(Math.round(num(v))) + ' ₽';
+  const fmtN = (v) => nf.format(Math.round(num(v)));
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-  // --- Логика Склада ---
-  async function loadStock() {
-    document.getElementById('stock-total').textContent = '...';
-    document.getElementById('stock-list').innerHTML = '<div class="loader">Загрузка из бота...</div>';
-    
+  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  const haptic = (type = 'light') => {
+    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type); } catch (_) {}
+  };
+
+  let stock = [];
+  let stockAt = 0;
+  let plan = [];
+  let loading = false;
+  let toastTimer = 0;
+
+  try {
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      if (tg.setHeaderColor) tg.setHeaderColor('#080a0e');
+      if (tg.setBackgroundColor) tg.setBackgroundColor('#080a0e');
+      document.documentElement.classList.add('tg');
+    }
+  } catch (_) {}
+
+  function toast(msg) {
+    const el = $('#toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  function ago(ts) {
+    const d = Math.max(0, Date.now() - num(ts));
+    if (d < 60000) return 'только что';
+    const m = Math.floor(d / 60000);
+    if (m < 60) return m + ' мин назад';
+    const h = Math.floor(m / 60);
+    if (h < 24) return h + ' ч назад';
+    return Math.floor(h / 24) + ' дн назад';
+  }
+
+  function imgUrl(images) {
+    const first = Array.isArray(images) ? images.find(Boolean) : '';
+    if (!first) return '';
+    if (/^https?:\/\//i.test(first)) return first;
+    return STORE_URL + String(first).replace(/^\.?\//, '');
+  }
+
+  function setTab(tab) {
+    $$('.tab').forEach((t) => {
+      const on = t.dataset.tab === tab;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    $$('.panel').forEach((p) => p.classList.toggle('active', p.id === 'panel-' + tab));
+    try { if (tg && tg.HapticFeedback) tg.HapticFeedback.selectionChanged(); } catch (_) {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  $$('.tab').forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
+
+  /* ---------- склад ---------- */
+
+  function readCache() {
     try {
-      const res = await fetch(WORKER_URL + '?t=' + Date.now());
-      if (!res.ok) throw new Error('Ошибка сервера: ' + res.status);
+      const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+      if (c && Array.isArray(c.items)) {
+        stock = c.items.filter((x) => x && x.title);
+        stockAt = num(c.at);
+      }
+    } catch (_) { stock = []; stockAt = 0; }
+  }
+
+  function writeCache() {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: stockAt, items: stock })); } catch (_) {}
+  }
+
+  function setLoading(on) {
+    loading = on;
+    const btn = $('#refreshBtn');
+    if (btn) btn.classList.toggle('spin', on);
+    if (on && !stock.length) {
+      $('#stockList').innerHTML = '<div class="skel"></div>'.repeat(4);
+    }
+  }
+
+  async function loadStock(opts = {}) {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch(STOCK_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
-      
-      if (data.error) throw new Error(data.error);
       if (!Array.isArray(data)) throw new Error('Неверный формат данных');
 
-      stockItems = data.map(i => ({
-        id: String(i.id ?? i.sku ?? uid()),
-        title: i.title || 'Без названия',
-        price: num(i.price), // Розничная цена
-        stock: num(i.stock)  // Количество
+      stock = data.map((p) => ({
+        id: String(p.id != null ? p.id : (p.sku != null ? p.sku : uid())),
+        title: String(p.title || 'Без названия').trim() || 'Без названия',
+        price: Math.max(0, num(p.price)),
+        oldPrice: Math.max(0, num(p.oldPrice)),
+        qty: Math.max(0, Math.round(num(p.stock))),
+        image: imgUrl(p.images)
       }));
-      
+      stockAt = Date.now();
+      writeCache();
       renderStock();
+      fillDatalist();
+      if (!opts.silent) toast('Данные сайта обновлены');
     } catch (e) {
-      document.getElementById('stock-total').textContent = '—';
-      document.getElementById('stock-list').innerHTML = `
-        <div class="empty">
-          <span style="font-size: 24px; display: block; margin-bottom: 8px;">⚠️</span>
-          Ошибка загрузки: ${esc(e.message)}<br><br>
-          <span style="font-size: 12px;">Убедитесь, что в Worker добавлен маршрут <code>/api/stock</code>.</span>
-        </div>`;
+      if (stock.length) {
+        if (!opts.silent) toast('Не удалось обновить — показываю последние данные');
+      } else {
+        $('#stockTotal').textContent = '—';
+        $('#stockMeta').textContent = 'Не удалось загрузить';
+        $('#stockChips').innerHTML = '';
+        $('#stockList').innerHTML = '<div class="empty"><div class="ico">⚠️</div><b>Склад не загрузился</b><span>' + esc(e.message || 'Ошибка сети') + '<br>Проверьте интернет и попробуйте снова.</span><button class="btn ghost" data-retry="1" style="margin-top:14px">Повторить</button></div>';
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
   function renderStock() {
-    const wrap = document.getElementById('stock-list');
-    if (!stockItems.length) {
-      wrap.innerHTML = '<div class="empty">Склад пуст (бот вернул пустой массив)</div>';
-      document.getElementById('stock-total').textContent = '0 ₽';
+    const total = stock.reduce((s, p) => s + p.price * p.qty, 0);
+    const units = stock.reduce((s, p) => s + p.qty, 0);
+    const inStock = stock.filter((p) => p.qty > 0).length;
+    const out = stock.filter((p) => p.qty === 0).length;
+
+    $('#stockTotal').textContent = fmt(total);
+    $('#stockMeta').textContent = stockAt
+      ? 'По ценам продажи · обновлено ' + ago(stockAt)
+      : 'По ценам продажи';
+    $('#stockChips').innerHTML = stock.length
+      ? '<span class="chip-stat"><b>' + inStock + '</b> в наличии</span>' +
+        '<span class="chip-stat"><b>' + fmtN(units) + '</b> шт</span>' +
+        (out ? '<span class="chip-stat warn"><b>' + out + '</b> без остатка</span>' : '')
+      : '';
+
+    const dot = $('#syncDot');
+    if (dot) dot.classList.toggle('stale', !stockAt || Date.now() - stockAt > FRESH_MS);
+
+    const host = $('#stockList');
+    if (!stock.length) {
+      host.innerHTML = '<div class="empty"><div class="ico">📦</div><b>Склад пуст</b><span>Сайт вернул пустой список товаров.</span></div>';
       return;
     }
-    
-    let total = 0;
-    wrap.innerHTML = stockItems.map(p => {
-      const sum = p.price * p.stock;
-      total += sum;
-      return `
-        <div class="row">
-          <div class="info">
-            <div class="name">${esc(p.title)}</div>
-            <div class="detail">${fmt(p.price)} × ${p.stock} шт</div>
-          </div>
-          <div class="sum">${fmt(sum)}</div>
-        </div>
-      `;
+
+    const rows = stock.slice().sort((a, b) =>
+      (b.qty > 0) - (a.qty > 0) ||
+      (b.price * b.qty) - (a.price * a.qty) ||
+      a.title.localeCompare(b.title, 'ru')
+    );
+
+    host.innerHTML = rows.map((p) => {
+      const sum = p.price * p.qty;
+      const badge = p.qty === 0 ? 'нет' : p.qty === 1 ? '1 шт' : p.qty + ' шт';
+      const badgeCls = p.qty === 0 ? 'zero' : p.qty === 1 ? 'one' : '';
+      const old = p.oldPrice > p.price ? ' · <s>' + fmt(p.oldPrice) + '</s>' : '';
+      const bg = p.image ? ' style="background-image:url(\'' + esc(p.image) + '\')"' : '';
+      return '<div class="row' + (p.qty === 0 ? ' out' : '') + '">' +
+        '<div class="thumb"' + bg + ' aria-hidden="true"></div>' +
+        '<div class="info">' +
+          '<div class="name" title="' + esc(p.title) + '">' + esc(p.title) + '</div>' +
+          '<div class="detail">' + fmt(p.price) + ' × ' + fmtN(p.qty) + ' шт' + old + '</div>' +
+        '</div>' +
+        '<div class="right">' +
+          '<div class="sum">' + fmt(sum) + '</div>' +
+          '<div class="badge ' + badgeCls + '">' + badge + '</div>' +
+        '</div>' +
+        '<button class="mini-add" data-add="' + esc(p.id) + '" title="Добавить в план закупки" aria-label="Добавить ' + esc(p.title) + ' в план">+</button>' +
+      '</div>';
     }).join('');
-    
-    document.getElementById('stock-total').textContent = fmt(total);
   }
 
-  // --- Логика Закупки (ручная) ---
-  function loadPurchase() {
-    try { purchase = JSON.parse(localStorage.getItem(PURCHASE_KEY)) || []; }
-    catch (_) { purchase = []; }
+  function fillDatalist() {
+    $('#stockNames').innerHTML = stock.map((p) => '<option value="' + esc(p.title) + '"></option>').join('');
   }
 
-  function savePurchase() {
-    localStorage.setItem(PURCHASE_KEY, JSON.stringify(purchase));
+  /* ---------- план закупки ---------- */
+
+  function readPlan() {
+    try {
+      const p = JSON.parse(localStorage.getItem(PLAN_KEY) || '[]');
+      plan = Array.isArray(p) ? p.filter((x) => x && x.name) : [];
+    } catch (_) { plan = []; }
   }
 
-  function renderPurchase() {
-    const wrap = document.getElementById('purchase-list');
-    if (!purchase.length) {
-      wrap.innerHTML = '<div class="empty">План закупки пуст.<br>Добавьте товары через форму выше.</div>';
-      document.getElementById('purchase-cost').textContent = '0 ₽';
-      document.getElementById('purchase-profit').textContent = '0 ₽';
-      document.getElementById('purchase-profit').style.color = 'var(--green)';
+  function savePlan() {
+    try { localStorage.setItem(PLAN_KEY, JSON.stringify(plan)); } catch (_) {}
+  }
+
+  function itemCalc(it) {
+    const qty = Math.max(0, Math.round(num(it.qty)));
+    const sold = Math.max(0, qty - 1);
+    const cost = Math.max(0, num(it.cost));
+    const price = Math.max(0, num(it.price));
+    const costTotal = cost * qty;
+    const revenue = price * sold;
+    const profit = (price - cost) * sold;
+    const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+    return { qty, sold, cost, price, costTotal, revenue, profit, margin };
+  }
+
+  function renderPlan() {
+    const t = plan.reduce((acc, it) => {
+      const c = itemCalc(it);
+      acc.cost += c.costTotal;
+      acc.rev += c.revenue;
+      acc.profit += c.profit;
+      acc.sold += c.sold;
+      acc.qty += c.qty;
+      return acc;
+    }, { cost: 0, rev: 0, profit: 0, sold: 0, qty: 0 });
+
+    const profitEl = $('#planProfit');
+    profitEl.textContent = fmt(t.profit);
+    profitEl.className = 'hero-value ' + (t.profit >= 0 ? 'green' : 'red');
+    $('#planCost').textContent = fmt(t.cost);
+    $('#planRevenue').textContent = fmt(t.rev);
+    $('#planSold').textContent = fmtN(t.sold) + ' шт';
+    $('#planCount').textContent = plan.length ? plan.length + ' поз.' : 'пусто';
+    $('#planSub').textContent = plan.length
+      ? 'Продаём ' + fmtN(t.sold) + ' из ' + fmtN(t.qty) + ' шт · одна штука с каждой позиции остаётся на витрине'
+      : 'Одна штука с каждой позиции остаётся на витрине';
+    $('#clearPlan').style.display = plan.length ? '' : 'none';
+
+    const host = $('#planList');
+    if (!plan.length) {
+      host.innerHTML = '<div class="empty"><div class="ico">🧾</div><b>План пока пуст</b><span>Добавьте товар выше — покажу вложения, выручку и прибыль.<br>Одна штука с каждой позиции остаётся на витрине.</span></div>';
       return;
     }
-    
-    let totalCost = 0;
-    let totalProfit = 0;
 
-    wrap.innerHTML = purchase.map(it => {
-      const costTotal = num(it.costPrice) * num(it.qty);
-      const revenue = num(it.retailPrice) * num(it.qty);
-      const profit = revenue - costTotal;
-      
-      // Считаем маржу в процентах от выручки (насколько выгоден товар)
-      const marginPercent = revenue > 0 ? (profit / revenue) * 100 : 0;
-      // Или можно считать наценку от затрат: (profit / costTotal) * 100
-      // Сделаем маржу (какую долю от цены продажи составляет прибыль)
-      
-      totalCost += costTotal;
-      totalProfit += profit;
-
-      const profitClass = profit >= 0 ? 'green' : 'red';
-      
-      return `
-        <div class="row" data-id="${esc(it.id)}">
-          <div class="info">
-            <div class="name">${esc(it.name)}</div>
-            <div class="detail">
-              ${it.qty} шт · Закуп: ${fmt(it.costPrice)} · Продажа: ${fmt(it.retailPrice)}
-            </div>
-            <div class="detail" style="margin-top: 6px;">
-              Прибыль: <span class="sum" style="color: var(--${profitClass})">${fmt(profit)}</span>
-              <span class="badge ${profitClass}">${marginPercent.toFixed(1)}%</span>
-            </div>
-          </div>
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-             <div class="sum" style="font-size: 13px; color: var(--muted);">Затраты: ${fmt(costTotal)}</div>
-             <button class="del" title="Удалить">×</button>
-          </div>
-        </div>
-      `;
+    host.innerHTML = plan.map((it) => {
+      const c = itemCalc(it);
+      return '<div class="row plan-row">' +
+        '<div class="info">' +
+          '<div class="name" title="' + esc(it.name) + '">' + esc(it.name) + '</div>' +
+          '<div class="detail">' + fmt(c.cost) + ' закупка · ' + fmt(c.price) + ' продажа</div>' +
+          '<div class="meta">' +
+            '<span class="tag">' + fmtN(c.qty) + ' шт</span>' +
+            '<span class="tag green">продаём ' + fmtN(c.sold) + '</span>' +
+            '<span class="tag">маржа ' + c.margin.toFixed(0) + '%</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="right">' +
+          '<div class="profit' + (c.profit >= 0 ? '' : ' neg') + '">' + fmt(c.profit) + '</div>' +
+          '<div class="detail">вложить ' + fmt(c.costTotal) + '</div>' +
+        '</div>' +
+        '<button class="del" data-del="' + esc(it.id) + '" title="Удалить" aria-label="Удалить">×</button>' +
+      '</div>';
     }).join('');
-    
-    document.getElementById('purchase-cost').textContent = fmt(totalCost);
-    document.getElementById('purchase-profit').textContent = fmt(totalProfit);
-    document.getElementById('purchase-profit').style.color = totalProfit >= 0 ? 'var(--green)' : 'var(--red)';
   }
 
-  function addPurchase() {
-    const nameEl = document.getElementById('purchase-name');
-    const qtyEl = document.getElementById('purchase-qty');
-    const costEl = document.getElementById('purchase-cost-price');
-    const retailEl = document.getElementById('purchase-retail-price');
-    
-    const name = nameEl.value.trim();
-    const qty = Math.floor(num(qtyEl.value));
-    const costPrice = num(costEl.value);
-    const retailPrice = num(retailEl.value);
+  function updatePreview() {
+    const qty = Math.max(0, Math.round(num($('#pQty').value)));
+    const cost = Math.max(0, num($('#pCost').value));
+    const price = Math.max(0, num($('#pPrice').value));
+    const sold = Math.max(0, qty - 1);
+    const profit = (price - cost) * sold;
+    const el = $('#formPreview');
 
-    if (!name) return alert('Введите название товара');
-    if (qty <= 0) return alert('Количество должно быть больше 0');
-
-    purchase.push({ 
-      id: uid(), 
-      name, 
-      qty, 
-      costPrice, 
-      retailPrice 
-    });
-    
-    savePurchase();
-    renderPurchase();
-    
-    // Очистка полей
-    nameEl.value = '';
-    qtyEl.value = '';
-    costEl.value = '';
-    retailEl.value = '';
-    nameEl.focus();
+    if (!qty && !price && !cost) {
+      el.innerHTML = 'Укажите количество и цену — покажу прибыль.';
+      return;
+    }
+    if (!qty) {
+      el.innerHTML = 'Укажите количество — минимум 2 шт, чтобы было что продавать.';
+      return;
+    }
+    if (!price) {
+      el.innerHTML = 'Укажите цену продажи — покажу прибыль.';
+      return;
+    }
+    const cls = profit >= 0 ? 'pos' : 'neg';
+    el.innerHTML = 'Продаём <b>' + fmtN(sold) + ' из ' + fmtN(qty) + '</b> шт · прибыль <b class="' + cls + '">' + fmt(profit) + '</b>' +
+      (qty === 1 ? ' · <span class="neg">одна штука остаётся на витрине</span>' : '');
   }
 
-  // --- Слушатели событий ---
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-    });
+  function addToPlan() {
+    const name = $('#pName').value.trim();
+    const qty = Math.floor(num($('#pQty').value));
+    const cost = Math.max(0, num($('#pCost').value));
+    const price = Math.max(0, num($('#pPrice').value));
+
+    if (!name) { toast('Введите название товара'); $('#pName').focus(); return; }
+    if (qty < 1) { toast('Количество должно быть больше 0'); $('#pQty').focus(); return; }
+    if (!(cost > 0)) { toast('Укажите закупочную цену'); $('#pCost').focus(); return; }
+    if (!(price > 0)) { toast('Укажите цену продажи'); $('#pPrice').focus(); return; }
+
+    plan.push({ id: uid(), name, qty, cost, price });
+    savePlan();
+    renderPlan();
+    ['pName', 'pQty', 'pCost', 'pPrice'].forEach((id) => { $('#' + id).value = ''; });
+    updatePreview();
+    haptic('medium');
+    toast('Добавлено в план');
+    $('#pName').focus();
+  }
+
+  /* ---------- события ---------- */
+
+  $('#refreshBtn').addEventListener('click', () => { haptic(); loadStock(); });
+  $('#addBtn').addEventListener('click', addToPlan);
+
+  ['pQty', 'pCost', 'pPrice'].forEach((id) => {
+    $('#' + id).addEventListener('input', updatePreview);
   });
 
-  document.getElementById('reload-btn').addEventListener('click', loadStock);
-  document.getElementById('purchase-add').addEventListener('click', addPurchase);
-  
-  document.getElementById('purchase-retail-price').addEventListener('keypress', e => {
-    if (e.key === 'Enter') addPurchase();
+  $('#pName').addEventListener('input', () => {
+    const q = $('#pName').value.trim().toLowerCase();
+    if (!q) return;
+    const p = stock.find((x) => x.title.toLowerCase() === q);
+    if (!p) return;
+    if (!$('#pPrice').value && p.price > 0) $('#pPrice').value = p.price;
+    if (!$('#pQty').value) $('#pQty').value = p.qty > 1 ? p.qty : 5;
+    updatePreview();
   });
 
-  // Удаление из закупки
-  document.getElementById('purchase-list').addEventListener('click', e => {
-    const btn = e.target.closest('button.del');
-    if (!btn) return;
-    const row = btn.closest('.row');
-    purchase = purchase.filter(x => x.id !== row.dataset.id);
-    savePurchase();
-    renderPurchase();
+  $('#pName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addToPlan(); } });
+  $('#pPrice').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addToPlan(); } });
+
+  $('#clearPlan').addEventListener('click', () => {
+    if (!plan.length) return;
+    if (!confirm('Очистить план закупки?')) return;
+    plan = [];
+    savePlan();
+    renderPlan();
+    haptic('warning');
+    toast('План очищен');
   });
 
-  // --- Старт ---
-  loadPurchase();
-  renderPurchase();
-  loadStock();
+  $('#stockList').addEventListener('click', (e) => {
+    if (e.target.closest('[data-retry]')) { loadStock(); return; }
+    const b = e.target.closest('[data-add]');
+    if (!b) return;
+    const p = stock.find((x) => x.id === b.dataset.add);
+    if (!p) return;
+    haptic();
+    setTab('purchase');
+    $('#pName').value = p.title;
+    $('#pQty').value = p.qty > 1 ? String(p.qty) : '5';
+    $('#pCost').value = '';
+    $('#pPrice').value = p.price > 0 ? String(p.price) : '';
+    updatePreview();
+    setTimeout(() => $('#pCost').focus(), 260);
+    toast('Товар подставлен — укажите закупку');
+  });
+
+  $('#planList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-del]');
+    if (!b) return;
+    plan = plan.filter((x) => x.id !== b.dataset.del);
+    savePlan();
+    renderPlan();
+    haptic('warning');
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && Date.now() - stockAt > FRESH_MS) loadStock({ silent: true });
+  });
+
+  /* ---------- старт ---------- */
+
+  readPlan();
+  readCache();
+  renderPlan();
+  if (stock.length) renderStock();
+  updatePreview();
+  loadStock({ silent: stock.length > 0 });
 })();
 </script>
 </body>
