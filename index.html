@@ -474,9 +474,10 @@ input::placeholder{color:#4d5a6c}
   if (!tg) {
     let tgTries = 0;
     const tgTimer = setInterval(() => {
-      if (initTelegram() || ++tgTries > 40) clearInterval(tgTimer);
+      if (initTelegram() || ++tgTries > 120) clearInterval(tgTimer);
     }, 50);
   }
+  window.addEventListener('load', initTelegram);
 
   function toast(msg) {
     const el = $('#toast');
