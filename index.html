@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Склад и закуп — МАРЖА</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
@@ -115,6 +115,8 @@ a{color:inherit}
 .hero-top{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .live{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#86efac;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.16);padding:3px 7px;border-radius:999px;letter-spacing:0;text-transform:none}
 .live i{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px rgba(74,222,128,.12)}
+.live.manager{color:#fcd34d;background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.18)}
+.live.manager i{background:var(--amber);box-shadow:0 0 0 3px rgba(251,191,36,.14)}
 .pill{font-size:10.5px;color:#b9c6d6;background:rgba(255,255,255,.04);border:1px solid var(--border-soft);padding:3px 8px;border-radius:999px;letter-spacing:0;text-transform:none}
 .hero-value{
   position:relative;margin:11px 0 4px;font-size:38px;line-height:1.05;font-weight:750;
@@ -128,9 +130,9 @@ a{color:inherit}
 .chip-stat b{color:#e9eef6;font-weight:650}
 .chip-stat.warn{color:#fcd34d;background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.15)}
 .chip-stat.warn b{color:#fcd34d}
-.stat-grid{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border-soft)}
+.stat-grid{position:relative;display:grid;grid-template-columns:repeat(2,1fr);gap:10px 8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border-soft)}
 .stat-grid span{display:block;font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
-.stat-grid b{font-size:15px;font-weight:650;font-variant-numeric:tabular-nums}
+.stat-grid b{font-size:16px;font-weight:650;font-variant-numeric:tabular-nums}
 
 /* ---------- hint ---------- */
 .hint{font-size:11.5px;color:var(--muted2);line-height:1.55;margin:0 2px 14px}
@@ -207,6 +209,49 @@ input::placeholder{color:#4d5a6c}
 }
 .del:hover{background:rgba(251,113,133,.10);border-color:rgba(251,113,133,.18)}
 
+/* ---------- ИИ-подбор ---------- */
+.ai-card{
+  position:relative;overflow:hidden;border-radius:18px;border:1px solid rgba(96,165,250,.20);
+  background:linear-gradient(160deg,#141b26,#0e1218 70%);padding:13px;
+}
+.ai-card::after{
+  content:"";position:absolute;right:-60px;top:-70px;width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(96,165,250,.14),transparent 70%);pointer-events:none;
+}
+.ai-head{position:relative;display:flex;align-items:center;gap:8px;font-size:11px;color:#9db4d0;margin-bottom:10px}
+.ai-spark{
+  width:24px;height:24px;border-radius:8px;display:grid;place-items:center;flex:none;
+  color:#bfdbfe;background:linear-gradient(140deg,rgba(96,165,250,.22),rgba(74,222,128,.12));
+  border:1px solid rgba(96,165,250,.22);font-size:12px;
+}
+.ai-head b{color:#dbe7f6;font-size:12px;font-weight:650}
+.ai-head span{color:var(--muted2);font-size:10.5px;margin-left:auto}
+.ai-list{position:relative;display:flex;flex-direction:column;gap:7px}
+.ai-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;
+  border:1px solid var(--border-soft);background:rgba(8,10,14,.45);
+}
+.ai-item .ai-ico{
+  width:30px;height:30px;border-radius:9px;flex:none;display:grid;place-items:center;
+  background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.14);font-size:14px;
+}
+.ai-item .ai-main{flex:1;min-width:0}
+.ai-item .ai-name{font-size:13px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.ai-item .ai-bottom{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap}
+.ai-item .ai-reason{font-size:10.5px;color:var(--muted2);min-width:0}
+.ai-item .ai-link{
+  margin-left:auto;flex:none;font-size:10.5px;font-weight:650;color:#93c5fd;text-decoration:none;white-space:nowrap;
+  padding:4px 8px;border-radius:8px;border:1px solid rgba(96,165,250,.20);background:rgba(96,165,250,.06);
+}
+.ai-item .ai-link:hover{background:rgba(96,165,250,.14)}
+.ai-item .ai-add{
+  flex:none;width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:#0b0e13;
+  color:var(--muted);font-size:17px;line-height:1;display:grid;place-items:center;
+}
+.ai-item .ai-add:hover{color:#04120a;background:var(--green);border-color:var(--green)}
+.ai-empty{position:relative;font-size:12px;line-height:1.55;color:var(--muted);padding:6px 2px}
+.ai-empty b{color:#c9d5e4}
+
 /* ---------- empty / skeleton ---------- */
 .empty{padding:34px 18px;border:1px dashed var(--border);border-radius:18px;background:rgba(18,22,29,.5);color:var(--muted);text-align:center}
 .empty .ico{font-size:26px;line-height:1;margin-bottom:9px;opacity:.85}
@@ -278,14 +323,14 @@ input::placeholder{color:#4d5a6c}
       <div class="hero">
         <div class="hero-top">
           <span>Стоимость склада</span>
-          <span class="live"><i></i> сайт</span>
+          <span class="live" id="stockSource"><i></i> сайт</span>
         </div>
         <div class="hero-value" id="stockTotal">—</div>
         <div class="hero-sub" id="stockMeta">Загружаю остатки и цены…</div>
         <div class="hero-chips" id="stockChips"></div>
       </div>
 
-      <div class="hint">Сумма по текущим остаткам и ценам продажи на сайте. Данные берутся из живого API магазина, а не из старого каталога.</div>
+      <div class="hint">Остатки и цены берутся из живого API магазина и мини-аппа менеджера — ровно то, что сейчас на сайте.</div>
 
       <div class="list" id="stockList">
         <div class="skel"></div>
@@ -298,14 +343,15 @@ input::placeholder{color:#4d5a6c}
     <section class="panel" id="panel-purchase">
       <div class="hero purchase">
         <div class="hero-top">
-          <span>Прибыль с закупки</span>
+          <span>Чистая прибыль</span>
           <span class="pill" id="planCount">пусто</span>
         </div>
         <div class="hero-value green" id="planProfit">0 ₽</div>
-        <div class="hero-sub" id="planSub">Одна штука с каждой позиции остаётся на витрине</div>
+        <div class="hero-sub" id="planSub">Выручка минус вложения. Одна штука с каждой позиции остаётся на витрине</div>
         <div class="stat-grid">
           <div><span>Вложить</span><b id="planCost">0 ₽</b></div>
           <div><span>Выручка</span><b id="planRevenue">0 ₽</b></div>
+          <div><span>Витрина</span><b id="planShowcase">0 ₽</b></div>
           <div><span>Продаём</span><b id="planSold">0 шт</b></div>
         </div>
       </div>
@@ -329,7 +375,7 @@ input::placeholder{color:#4d5a6c}
         </div>
         <div class="preview" id="formPreview">Укажите количество и цену — покажу прибыль.</div>
         <button class="btn primary" id="addBtn">Добавить в план</button>
-        <div class="formula">Прибыль = (цена − закупка) × (кол-во − 1).<br>Одна штука остаётся на витрине.</div>
+        <div class="formula">Чистая прибыль = выручка − вложения.<br>Вложения = закупка × кол-во. Одна штука остаётся на витрине.</div>
       </div>
 
       <div class="section-row">
@@ -337,6 +383,15 @@ input::placeholder{color:#4d5a6c}
         <button class="btn ghost" id="clearPlan" style="display:none">Очистить</button>
       </div>
       <div class="list" id="planList"></div>
+
+      <div class="section-row">
+        <b>ИИ-подбор</b>
+        <button class="btn ghost" id="aiRefresh">Другие</button>
+      </div>
+      <div class="ai-card" id="aiCard">
+        <div class="ai-head"><span class="ai-spark">✦</span><b>Похожие товары</b><span>без цен</span></div>
+        <div class="ai-list" id="aiList"><div class="ai-empty">Собираю идеи под вашу закупку…</div></div>
+      </div>
     </section>
   </main>
 
@@ -353,10 +408,12 @@ input::placeholder{color:#4d5a6c}
   'use strict';
 
   const STOCK_URL = 'https://pf-store-orders.vegnette.workers.dev/api/stock';
+  const OVERRIDES_URL = 'https://pf-store-orders.vegnette.workers.dev/overrides';
   const STORE_URL = 'https://vegnette.github.io/pf-store/';
-  const CACHE_KEY = 'zakup_stock_v1';
+  const WIKKEO_URL = 'https://wikkeo.com/search?search=';
+  const CACHE_KEY = 'zakup_stock_v2';
   const PLAN_KEY = 'zakup_plan_v1';
-  const FRESH_MS = 5 * 60 * 1000;
+  const FRESH_MS = 60 * 1000;
 
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -371,26 +428,55 @@ input::placeholder{color:#4d5a6c}
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-  const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+  let tg = null;
   const haptic = (type = 'light') => {
     try { if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred(type); } catch (_) {}
   };
 
   let stock = [];
   let stockAt = 0;
+  let managerAt = 0;
+  let managerOk = false;
   let plan = [];
   let loading = false;
   let toastTimer = 0;
+  let aiOffset = 0;
 
-  try {
-    if (tg) {
+  function applyInsets() {
+    if (!tg) return;
+    try {
+      const safe = tg.safeAreaInset || {};
+      const content = tg.contentSafeAreaInset || {};
+      const rawTop = Math.max(num(safe.top), num(content.top));
+      const rawBottom = Math.max(num(safe.bottom), num(content.bottom));
+      const root = document.documentElement;
+      root.style.setProperty('--safe-t', (rawTop > 0 ? rawTop : 44) + 'px');
+      if (rawBottom > 0) root.style.setProperty('--safe-b', rawBottom + 'px');
+    } catch (_) {}
+  }
+
+  function initTelegram() {
+    if (tg || !(window.Telegram && window.Telegram.WebApp)) return false;
+    tg = window.Telegram.WebApp;
+    try {
       tg.ready();
       tg.expand();
       if (tg.setHeaderColor) tg.setHeaderColor('#080a0e');
       if (tg.setBackgroundColor) tg.setBackgroundColor('#080a0e');
+      if (tg.onEvent) tg.onEvent('viewportChanged', applyInsets);
+      applyInsets();
       document.documentElement.classList.add('tg');
-    }
-  } catch (_) {}
+    } catch (_) {}
+    return true;
+  }
+
+  initTelegram();
+  if (!tg) {
+    let tgTries = 0;
+    const tgTimer = setInterval(() => {
+      if (initTelegram() || ++tgTries > 40) clearInterval(tgTimer);
+    }, 50);
+  }
 
   function toast(msg) {
     const el = $('#toast');
@@ -439,12 +525,14 @@ input::placeholder{color:#4d5a6c}
       if (c && Array.isArray(c.items)) {
         stock = c.items.filter((x) => x && x.title);
         stockAt = num(c.at);
+        managerAt = num(c.managerAt);
+        managerOk = !!c.managerOk;
       }
-    } catch (_) { stock = []; stockAt = 0; }
+    } catch (_) { stock = []; stockAt = 0; managerAt = 0; managerOk = false; }
   }
 
   function writeCache() {
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: stockAt, items: stock })); } catch (_) {}
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify({ at: stockAt, managerAt, managerOk, items: stock })); } catch (_) {}
   }
 
   function setLoading(on) {
@@ -456,28 +544,63 @@ input::placeholder{color:#4d5a6c}
     }
   }
 
+  async function fetchJson(url) {
+    const res = await fetch(url + (url.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  }
+
+  // Свежие остатки и цены: базовый каталог + правки менеджера из мини-аппа.
+  function mergeStock(base, ov) {
+    const list = Array.isArray(base) ? base : (base && (base.items || base.products)) || [];
+    const ovProducts = (ov && ov.products) || {};
+    const ovStock = (ov && ov.stock) || {};
+    let latest = 0;
+
+    const items = list.map((p) => {
+      const id = String(p.id != null ? p.id : (p.sku != null ? p.sku : uid()));
+      const op = ovProducts[id] || {};
+      const hasOvStock = Object.prototype.hasOwnProperty.call(ovStock, id);
+      const rawQty = hasOvStock
+        ? (ovStock[id] && typeof ovStock[id] === 'object' ? ovStock[id].qty : ovStock[id])
+        : p.stock;
+      const updated = Date.parse(op.updatedAt || '') || 0;
+      if (updated > latest) latest = updated;
+      return {
+        id,
+        category: String(op.category || p.category || '').toLowerCase(),
+        title: String(op.title || p.title || 'Без названия').trim() || 'Без названия',
+        price: Math.max(0, num(op.price != null ? op.price : p.price)),
+        oldPrice: Math.max(0, num(op.oldPrice != null ? op.oldPrice : p.oldPrice)),
+        qty: Math.max(0, Math.round(num(rawQty))),
+        image: imgUrl(p.images)
+      };
+    });
+
+    return { items, latest };
+  }
+
   async function loadStock(opts = {}) {
     if (loading) return;
     setLoading(true);
     try {
-      const res = await fetch(STOCK_URL + '?t=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if (!Array.isArray(data)) throw new Error('Неверный формат данных');
+      const results = await Promise.allSettled([fetchJson(STOCK_URL), fetchJson(OVERRIDES_URL)]);
+      if (results[0].status === 'rejected') {
+        const reason = results[0].reason;
+        throw new Error(reason && reason.message ? reason.message : 'Каталог недоступен');
+      }
+      const ov = results[1].status === 'fulfilled' && results[1].value ? results[1].value : {};
+      const merged = mergeStock(results[0].value, ov);
 
-      stock = data.map((p) => ({
-        id: String(p.id != null ? p.id : (p.sku != null ? p.sku : uid())),
-        title: String(p.title || 'Без названия').trim() || 'Без названия',
-        price: Math.max(0, num(p.price)),
-        oldPrice: Math.max(0, num(p.oldPrice)),
-        qty: Math.max(0, Math.round(num(p.stock))),
-        image: imgUrl(p.images)
-      }));
+      stock = merged.items;
+      managerAt = merged.latest;
+      managerOk = results[1].status === 'fulfilled';
       stockAt = Date.now();
       writeCache();
       renderStock();
       fillDatalist();
-      if (!opts.silent) toast('Данные сайта обновлены');
+      renderAI();
+      if (!opts.silent) toast(managerOk ? 'Данные магазина обновлены' : 'Данные сайта обновлены, правки менеджера недоступны');
     } catch (e) {
       if (stock.length) {
         if (!opts.silent) toast('Не удалось обновить — показываю последние данные');
@@ -500,8 +623,16 @@ input::placeholder{color:#4d5a6c}
 
     $('#stockTotal').textContent = fmt(total);
     $('#stockMeta').textContent = stockAt
-      ? 'По ценам продажи · обновлено ' + ago(stockAt)
+      ? (managerOk
+          ? 'Цены и остатки из мини-аппа менеджера · проверено ' + ago(stockAt)
+          : 'По ценам продажи · обновлено ' + ago(stockAt))
       : 'По ценам продажи';
+
+    const src = $('#stockSource');
+    if (src) {
+      src.classList.toggle('manager', managerOk);
+      src.innerHTML = '<i></i> ' + (managerOk ? 'менеджер' : 'сайт');
+    }
     $('#stockChips').innerHTML = stock.length
       ? '<span class="chip-stat"><b>' + inStock + '</b> в наличии</span>' +
         '<span class="chip-stat"><b>' + fmtN(units) + '</b> шт</span>' +
@@ -566,44 +697,49 @@ input::placeholder{color:#4d5a6c}
     const sold = Math.max(0, qty - 1);
     const cost = Math.max(0, num(it.cost));
     const price = Math.max(0, num(it.price));
-    const costTotal = cost * qty;
-    const revenue = price * sold;
-    const profit = (price - cost) * sold;
-    const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
-    return { qty, sold, cost, price, costTotal, revenue, profit, margin };
+    const invested = cost * qty;       // вложили во всю партию
+    const showcase = cost;             // одна штука остаётся на витрине
+    const revenue = price * sold;      // продаём всё, кроме витринной
+    const profit = revenue - invested; // чистая прибыль
+    const roi = invested > 0 ? (profit / invested) * 100 : 0;
+    return { qty, sold, cost, price, invested, showcase, revenue, profit, roi };
   }
 
   function renderPlan() {
     const t = plan.reduce((acc, it) => {
       const c = itemCalc(it);
-      acc.cost += c.costTotal;
+      acc.invested += c.invested;
+      acc.showcase += c.showcase;
       acc.rev += c.revenue;
       acc.profit += c.profit;
       acc.sold += c.sold;
       acc.qty += c.qty;
       return acc;
-    }, { cost: 0, rev: 0, profit: 0, sold: 0, qty: 0 });
+    }, { invested: 0, showcase: 0, rev: 0, profit: 0, sold: 0, qty: 0 });
 
     const profitEl = $('#planProfit');
     profitEl.textContent = fmt(t.profit);
     profitEl.className = 'hero-value ' + (t.profit >= 0 ? 'green' : 'red');
-    $('#planCost').textContent = fmt(t.cost);
+    $('#planCost').textContent = fmt(t.invested);
     $('#planRevenue').textContent = fmt(t.rev);
+    $('#planShowcase').textContent = fmt(t.showcase);
     $('#planSold').textContent = fmtN(t.sold) + ' шт';
     $('#planCount').textContent = plan.length ? plan.length + ' поз.' : 'пусто';
     $('#planSub').textContent = plan.length
-      ? 'Продаём ' + fmtN(t.sold) + ' из ' + fmtN(t.qty) + ' шт · одна штука с каждой позиции остаётся на витрине'
-      : 'Одна штука с каждой позиции остаётся на витрине';
+      ? 'Продаём ' + fmtN(t.sold) + ' из ' + fmtN(t.qty) + ' шт · на витрине ' + fmt(t.showcase)
+      : 'Выручка минус вложения. Одна штука с каждой позиции остаётся на витрине';
     $('#clearPlan').style.display = plan.length ? '' : 'none';
 
     const host = $('#planList');
     if (!plan.length) {
-      host.innerHTML = '<div class="empty"><div class="ico">🧾</div><b>План пока пуст</b><span>Добавьте товар выше — покажу вложения, выручку и прибыль.<br>Одна штука с каждой позиции остаётся на витрине.</span></div>';
+      host.innerHTML = '<div class="empty"><div class="ico">🧾</div><b>План пока пуст</b><span>Добавьте товар выше — покажу вложения, выручку и чистую прибыль.<br>Одна штука с каждой позиции остаётся на витрине.</span></div>';
+      renderAI();
       return;
     }
 
     host.innerHTML = plan.map((it) => {
       const c = itemCalc(it);
+      const roiText = (c.roi >= 0 ? '+' : '') + c.roi.toFixed(0) + '%';
       return '<div class="row plan-row">' +
         '<div class="info">' +
           '<div class="name" title="' + esc(it.name) + '">' + esc(it.name) + '</div>' +
@@ -611,16 +747,19 @@ input::placeholder{color:#4d5a6c}
           '<div class="meta">' +
             '<span class="tag">' + fmtN(c.qty) + ' шт</span>' +
             '<span class="tag green">продаём ' + fmtN(c.sold) + '</span>' +
-            '<span class="tag">маржа ' + c.margin.toFixed(0) + '%</span>' +
+            '<span class="tag">витрина ' + fmt(c.showcase) + '</span>' +
+            '<span class="tag">' + roiText + ' к вложениям</span>' +
           '</div>' +
         '</div>' +
         '<div class="right">' +
           '<div class="profit' + (c.profit >= 0 ? '' : ' neg') + '">' + fmt(c.profit) + '</div>' +
-          '<div class="detail">вложить ' + fmt(c.costTotal) + '</div>' +
+          '<div class="detail">вложить ' + fmt(c.invested) + '</div>' +
         '</div>' +
         '<button class="del" data-del="' + esc(it.id) + '" title="Удалить" aria-label="Удалить">×</button>' +
       '</div>';
     }).join('');
+
+    renderAI();
   }
 
   function updatePreview() {
@@ -628,11 +767,13 @@ input::placeholder{color:#4d5a6c}
     const cost = Math.max(0, num($('#pCost').value));
     const price = Math.max(0, num($('#pPrice').value));
     const sold = Math.max(0, qty - 1);
-    const profit = (price - cost) * sold;
+    const invested = cost * qty;
+    const revenue = price * sold;
+    const profit = revenue - invested;
     const el = $('#formPreview');
 
     if (!qty && !price && !cost) {
-      el.innerHTML = 'Укажите количество и цену — покажу прибыль.';
+      el.innerHTML = 'Укажите количество, закупку и цену — покажу чистую прибыль.';
       return;
     }
     if (!qty) {
@@ -640,12 +781,17 @@ input::placeholder{color:#4d5a6c}
       return;
     }
     if (!price) {
-      el.innerHTML = 'Укажите цену продажи — покажу прибыль.';
+      el.innerHTML = 'Укажите цену продажи — покажу выручку и чистую прибыль.';
+      return;
+    }
+    if (!cost) {
+      el.innerHTML = 'Укажите закупочную цену — покажу чистую прибыль.';
       return;
     }
     const cls = profit >= 0 ? 'pos' : 'neg';
-    el.innerHTML = 'Продаём <b>' + fmtN(sold) + ' из ' + fmtN(qty) + '</b> шт · прибыль <b class="' + cls + '">' + fmt(profit) + '</b>' +
-      (qty === 1 ? ' · <span class="neg">одна штука остаётся на витрине</span>' : '');
+    el.innerHTML = 'Продаём <b>' + fmtN(sold) + ' из ' + fmtN(qty) + '</b> · вложить <b>' + fmt(invested) + '</b> · выручка <b>' + fmt(revenue) + '</b><br>' +
+      'Чистая прибыль <b class="' + cls + '">' + fmt(profit) + '</b>' +
+      (qty === 1 ? ' · <span class="neg">вся партия остаётся на витрине</span>' : '');
   }
 
   function addToPlan() {
@@ -669,10 +815,164 @@ input::placeholder{color:#4d5a6c}
     $('#pName').focus();
   }
 
+  /* ---------- ИИ-подбор ---------- */
+
+  const AI_RULES = [
+    {
+      id: 'audio', label: 'аудио', icon: '🎧',
+      re: /airpods|наушник|ebud|earbud|tws|headphone|гарнитур|аудио|звук/i,
+      cat: /headphone|audio/i,
+      seeds: [
+        'Наушники TWS с активным шумоподавлением',
+        'Беспроводные наушники с зарядным кейсом',
+        'Накладные Bluetooth-наушники',
+        'Спортивные наушники с крючком',
+        'Проводная гарнитура USB-C'
+      ]
+    },
+    {
+      id: 'watch', label: 'часы', icon: '⌚',
+      re: /watch|час[ыа]|smartwatch|браслет|ремеш|фитнес/i,
+      cat: /watch|wearable/i,
+      seeds: [
+        'Умные часы с AMOLED-экраном',
+        'Фитнес-браслет с пульсометром',
+        'Набор ремешков для Apple Watch',
+        'Защитное стекло для умных часов',
+        'Беспроводная зарядка для часов'
+      ]
+    },
+    {
+      id: 'glasses', label: 'очки', icon: '🕶',
+      re: /ray-?ban|очк|glasses|vision|оправ/i,
+      cat: /glasses/i,
+      seeds: [
+        'Умные очки с камерой и Bluetooth',
+        'Солнцезащитные очки Polarized',
+        'Очки с открытыми динамиками',
+        'Сменные линзы для умных очков',
+        'Жёсткий чехол для очков'
+      ]
+    },
+    {
+      id: 'phone', label: 'аксессуары', icon: '📱',
+      re: /iphone|айфон|смартфон|телефон|чехол|стекл|magsafe|кабел|зарядк|power ?bank|адаптер/i,
+      cat: /^(phone|accessor|charger|cable)/i,
+      seeds: [
+        'Чехол MagSafe с прозрачным корпусом',
+        'Защитное стекло 9H с рамкой',
+        'Кабель USB-C на 60 Вт',
+        'Power bank 10 000 мАч',
+        'Автомобильный держатель с MagSafe'
+      ]
+    },
+    {
+      id: 'gadget', label: 'гаджеты', icon: '✨',
+      re: /колонк|speaker|камер|gopro|трекер|ламп|умн|гаджет/i,
+      cat: /speaker|gadget|smart/i,
+      seeds: [
+        'Портативная Bluetooth-колонка',
+        'Умная лампа с Wi-Fi',
+        'GPS-трекер для ключей',
+        'Мини-проектор для телефона',
+        'Беспроводная зарядная станция 3-в-1'
+      ]
+    }
+  ];
+
+  function aiSuggestions() {
+    const sources = [];
+    plan.forEach((it) => sources.push({ name: it.name, category: '', fromPlan: true }));
+    if (!plan.length) {
+      stock.slice().sort((a, b) => a.qty - b.qty).forEach((p) => sources.push({ name: p.title, category: p.category }));
+    }
+    stock.filter((p) => p.qty === 0).forEach((p) => sources.push({ name: p.title, category: p.category, out: true }));
+
+    const tags = [];
+    AI_RULES.forEach((rule) => {
+      const hit = sources.find((s) => rule.re.test(s.name) || (s.category && rule.cat.test(s.category)));
+      if (hit && !tags.some((t) => t.rule.id === rule.id)) {
+        tags.push({ rule, basedOn: hit.name, out: !!hit.out, fromPlan: !!hit.fromPlan });
+      }
+    });
+    if (!tags.length) tags.push({ rule: AI_RULES[4], basedOn: 'витрина магазина', out: false, fromPlan: false });
+
+    const inPlan = (name) => plan.some((p) => String(p.name).trim().toLowerCase() === name.toLowerCase());
+    const pools = tags.map(({ rule, basedOn, out, fromPlan }) => {
+      const off = aiOffset % rule.seeds.length;
+      const seeds = rule.seeds.slice(off).concat(rule.seeds.slice(0, off));
+      return { rule, basedOn, out, fromPlan, names: seeds.filter((n) => !inPlan(n)) };
+    }).filter((p) => p.names.length);
+
+    const items = [];
+    const seen = new Set();
+    let round = 0;
+    while (items.length < 5 && pools.some((p) => p.names.length > round)) {
+      pools.forEach((pool) => {
+        if (items.length >= 5) return;
+        const name = pool.names[round];
+        if (!name || seen.has(name)) return;
+        seen.add(name);
+        items.push({
+          name,
+          icon: pool.rule.icon,
+          reason: pool.out
+            ? 'закончилось на складе · ' + pool.rule.label
+            : pool.fromPlan
+              ? 'похоже на «' + pool.basedOn + '»'
+              : 'идея для склада · ' + pool.rule.label
+        });
+      });
+      round += 1;
+    }
+    return items;
+  }
+
+  function renderAI() {
+    const host = $('#aiList');
+    if (!host) return;
+    const items = aiSuggestions();
+    if (!items.length) {
+      host.innerHTML = '<div class="ai-empty">Добавьте товар в план — подберу похожие позиции для закупа.</div>';
+      return;
+    }
+    host.innerHTML = items.map((s) =>
+      '<div class="ai-item">' +
+        '<div class="ai-ico">' + s.icon + '</div>' +
+        '<div class="ai-main">' +
+          '<div class="ai-name" title="' + esc(s.name) + '">' + esc(s.name) + '</div>' +
+          '<div class="ai-bottom">' +
+            '<span class="ai-reason">' + esc(s.reason) + '</span>' +
+            '<a class="ai-link" href="' + esc(WIKKEO_URL + encodeURIComponent(s.name)) + '" target="_blank" rel="noopener">Wikkeo ↗</a>' +
+          '</div>' +
+        '</div>' +
+        '<button class="ai-add" data-ai="' + esc(s.name) + '" title="Подставить в план" aria-label="Подставить ' + esc(s.name) + '">+</button>' +
+      '</div>'
+    ).join('');
+  }
+
   /* ---------- события ---------- */
 
   $('#refreshBtn').addEventListener('click', () => { haptic(); loadStock(); });
   $('#addBtn').addEventListener('click', addToPlan);
+
+  $('#aiRefresh').addEventListener('click', () => { aiOffset += 1; renderAI(); haptic(); });
+
+  $('#aiList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ai]');
+    if (!b) return;
+    haptic();
+    setTab('purchase');
+    $('#pName').value = b.dataset.ai;
+    $('#pQty').value = '5';
+    $('#pCost').value = '';
+    $('#pPrice').value = '';
+    updatePreview();
+    const card = $('#pName').closest('.card');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => $('#pCost').focus(), 280);
+    toast('Товар подставлен — укажите закупку');
+  });
 
   ['pQty', 'pCost', 'pPrice'].forEach((id) => {
     $('#' + id).addEventListener('input', updatePreview);
@@ -728,8 +1028,12 @@ input::placeholder{color:#4d5a6c}
   });
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && Date.now() - stockAt > FRESH_MS) loadStock({ silent: true });
+    if (!document.hidden && Date.now() - stockAt > 30000) loadStock({ silent: true });
   });
+
+  setInterval(() => {
+    if (!document.hidden) loadStock({ silent: true });
+  }, FRESH_MS);
 
   /* ---------- старт ---------- */
 
