@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Склад и закуп — МАРЖА</title>
+<title>AI-агент закупа — МАРЖА</title>
 <script src="https://telegram.org/js/telegram-web-app.js" async></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -209,6 +209,46 @@ input::placeholder{color:#4d5a6c}
 }
 .del:hover{background:rgba(251,113,133,.10);border-color:rgba(251,113,133,.18)}
 
+/* ---------- графики ---------- */
+.chart-card{
+  padding:14px;margin-bottom:12px;border-radius:18px;border:1px solid var(--border);
+  background:linear-gradient(180deg,var(--card2),var(--card));
+}
+.chart-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+.chart-head b{font-size:13.5px}
+.chart-head span{font-size:10.5px;color:var(--muted2)}
+.donut-row{display:flex;align-items:center;gap:16px}
+.donut-box{position:relative;width:112px;height:112px;flex:none}
+.donut{
+  width:100%;height:100%;border-radius:50%;background:#1b2330;
+  -webkit-mask:radial-gradient(circle,transparent 54%,#000 55%);
+  mask:radial-gradient(circle,transparent 54%,#000 55%);
+}
+.donut-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}
+.donut-center b{font-size:14px;font-variant-numeric:tabular-nums}
+.donut-center span{font-size:9.5px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;margin-top:1px}
+.legend{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.legend-row{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted)}
+.legend-row i{width:8px;height:8px;border-radius:3px;flex:none}
+.legend-row span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legend-row b{font-size:11.5px;color:var(--text);font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.legend-row em{font-style:normal;color:var(--muted2);font-size:10px;margin-left:4px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;flex-direction:column;gap:5px}
+.bar-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--muted)}
+.bar-top span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-top em{font-style:normal;color:var(--muted2);font-size:10px}
+.bar-top b{color:var(--text);font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar-track{height:7px;border-radius:999px;background:#0b0e13;border:1px solid var(--border-soft);overflow:hidden}
+.bar-track i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#34d399,#4ade80);transition:width .3s ease}
+.bar-track i.blue{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+.bar-track i.amber{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.bar-track i.red{background:linear-gradient(90deg,#f43f5e,#fb7185)}
+.breakeven{margin-top:12px;padding-top:12px;border-top:1px solid var(--border-soft)}
+.breakeven-top{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--muted2);margin-bottom:6px}
+.breakeven-top b{color:var(--text);font-weight:650}
+.breakeven-note{font-size:10.5px;color:var(--muted2);margin-top:6px;line-height:1.45}
+
 /* ---------- ИИ-подбор ---------- */
 .ai-card{
   position:relative;overflow:hidden;border-radius:18px;border:1px solid rgba(96,165,250,.20);
@@ -226,6 +266,12 @@ input::placeholder{color:#4d5a6c}
 }
 .ai-head b{color:#dbe7f6;font-size:12px;font-weight:650}
 .ai-head span{color:var(--muted2);font-size:10.5px;margin-left:auto}
+.ai-summary{
+  position:relative;font-size:11.5px;line-height:1.55;color:#b9c6d6;
+  background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.14);
+  border-radius:10px;padding:8px 10px;margin-bottom:10px;
+}
+.ai-summary b{color:#dbe7f6;font-weight:650}
 .ai-list{position:relative;display:flex;flex-direction:column;gap:7px}
 .ai-item{
   display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:12px;
@@ -239,6 +285,7 @@ input::placeholder{color:#4d5a6c}
 .ai-item .ai-name{font-size:13px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
 .ai-item .ai-bottom{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap}
 .ai-item .ai-reason{font-size:10.5px;color:var(--muted2);min-width:0}
+.ai-item .ai-reason.warn{color:#fcd34d}
 .ai-item .ai-link{
   margin-left:auto;flex:none;font-size:10.5px;font-weight:650;color:#93c5fd;text-decoration:none;white-space:nowrap;
   padding:4px 8px;border-radius:8px;border:1px solid rgba(96,165,250,.20);background:rgba(96,165,250,.06);
@@ -249,6 +296,33 @@ input::placeholder{color:#4d5a6c}
   color:var(--muted);font-size:17px;line-height:1;display:grid;place-items:center;
 }
 .ai-item .ai-add:hover{color:#04120a;background:var(--green);border-color:var(--green)}
+.ai-supplier{display:flex;align-items:center;gap:5px;min-width:0;font-size:10.5px;color:var(--muted2)}
+.ai-supplier a{color:#9db4d0;text-decoration:none;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.ai-supplier a:hover{color:#bfdbfe}
+.ai-supplier .star{color:#fbbf24;font-size:10px}
+.ai-loading{color:#93c5fd;font-size:10.5px;animation:aiPulse 1.2s ease-in-out infinite}
+@keyframes aiPulse{0%,100%{opacity:.45}50%{opacity:1}}
+.ai-summary.warn{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.22);color:#f5d98a}
+.ai-summary.warn b{color:#fde68a}
+
+/* ---------- анализ / план ухода ---------- */
+.insights{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.insight{padding:10px;border-radius:12px;border:1px solid var(--border-soft);background:rgba(8,10,14,.45);min-width:0}
+.insight span{display:block;font-size:10px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insight b{display:block;margin-top:3px;font-size:14px;font-weight:650;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insight b.green{color:var(--green)}
+.insight b.amber{color:#fbbf24}
+.seg{display:flex;gap:6px;margin-bottom:12px}
+.seg button{
+  flex:1;padding:7px 0;border-radius:9px;border:1px solid var(--border);background:#0b0e13;
+  color:var(--muted);font-size:11px;font-weight:600;transition:.15s;
+}
+.seg button.on{color:#04120a;background:var(--green);border-color:var(--green)}
+.selloff-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border-soft)}
+.selloff-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.selloff-row .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#c9d5e4}
+.selloff-row b{font-weight:650;color:var(--text);white-space:nowrap;font-variant-numeric:tabular-nums}
+.selloff-row .wk{color:var(--muted2);font-size:10px;white-space:nowrap}
 .ai-empty{position:relative;font-size:12px;line-height:1.55;color:var(--muted);padding:6px 2px}
 .ai-empty b{color:#c9d5e4}
 
@@ -296,8 +370,8 @@ input::placeholder{color:#4d5a6c}
 <div class="app">
   <header class="top">
     <div class="brand">
-      <div class="mark">М</div>
-      <div><b>МАРЖА</b><span>склад · закуп</span></div>
+      <div class="mark">AI</div>
+      <div><b>МАРЖА</b><span>AI-агент закупа</span></div>
     </div>
     <div class="top-actions">
       <span class="sync-dot" id="syncDot" title="Данные с сайта"></span>
@@ -330,6 +404,27 @@ input::placeholder{color:#4d5a6c}
         <div class="hero-chips" id="stockChips"></div>
       </div>
 
+      <div class="chart-card">
+        <div class="chart-head"><b>Структура склада</b><span>по категориям</span></div>
+        <div class="donut-row">
+          <div class="donut-box">
+            <div class="donut" id="stockDonut"></div>
+            <div class="donut-center"><b id="donutTotal">—</b><span>всего</span></div>
+          </div>
+          <div class="legend" id="stockLegend"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head"><b>Стоимость по позициям</b><span>цена × остаток</span></div>
+        <div class="bars" id="stockBars"></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head"><b>Анализ склада</b><span>срез</span></div>
+        <div class="insights" id="stockInsights"></div>
+      </div>
+
       <div class="hint">Остатки и цены берутся из живого API магазина и мини-аппа менеджера — ровно то, что сейчас на сайте.</div>
 
       <div class="list" id="stockList">
@@ -354,6 +449,31 @@ input::placeholder{color:#4d5a6c}
           <div><span>Витрина</span><b id="planShowcase">0 ₽</b></div>
           <div><span>Продаём</span><b id="planSold">0 шт</b></div>
         </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head"><b>Деньги плана</b><span>вложения → выручка</span></div>
+        <div class="bars" id="planBars"></div>
+        <div class="breakeven">
+          <div class="breakeven-top"><span>Окупаемость</span><b id="planBreakEven">—</b></div>
+          <div class="bar-track"><i id="planBreakEvenBar" style="width:0%"></i></div>
+          <div class="breakeven-note" id="planBreakEvenNote">Добавьте позиции в план.</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-head"><b>План ухода товара</b><span>прогноз продаж</span></div>
+        <div class="seg" id="sellOffSeg" role="group" aria-label="Горизонт продаж">
+          <button data-weeks="2">2 недели</button>
+          <button data-weeks="4" class="on">4 недели</button>
+          <button data-weeks="8">8 недель</button>
+        </div>
+        <div class="bars" id="sellOffBars"></div>
+        <div class="breakeven">
+          <div class="breakeven-top"><span>Темп продаж</span><b id="sellOffRate">—</b></div>
+          <div class="breakeven-note" id="sellOffNote">Добавьте позиции в план — построю график ухода.</div>
+        </div>
+        <div class="selloff-list" id="sellOffList"></div>
       </div>
 
       <div class="card">
@@ -385,18 +505,19 @@ input::placeholder{color:#4d5a6c}
       <div class="list" id="planList"></div>
 
       <div class="section-row">
-        <b>ИИ-подбор</b>
+        <b>AI-агент закупа</b>
         <button class="btn ghost" id="aiRefresh">Другие</button>
       </div>
       <div class="ai-card" id="aiCard">
-        <div class="ai-head"><span class="ai-spark">✦</span><b>Похожие товары</b><span>без цен</span></div>
+        <div class="ai-head"><span class="ai-spark">✦</span><b>AI-агент закупа</b><span>локально</span></div>
+        <div class="ai-summary" id="aiSummary">Собираю рекомендации…</div>
         <div class="ai-list" id="aiList"><div class="ai-empty">Собираю идеи под вашу закупку…</div></div>
       </div>
     </section>
   </main>
 
   <footer class="foot">
-    <span>Данные магазина pf-store</span>
+    <span>pf-store · AI-агент закупа</span>
     <a href="https://vegnette.github.io/pf-store/" target="_blank" rel="noopener">Открыть магазин ↗</a>
   </footer>
 </div>
@@ -410,7 +531,9 @@ input::placeholder{color:#4d5a6c}
   const STOCK_URL = 'https://pf-store-orders.vegnette.workers.dev/api/stock';
   const OVERRIDES_URL = 'https://pf-store-orders.vegnette.workers.dev/overrides';
   const STORE_URL = 'https://vegnette.github.io/pf-store/';
-  const WIKKEO_URL = 'https://wikkeo.com/search?search=';
+  const WIKKEO_API = 'https://api-preview.wikkeo.com/6bb6973073cd3dd7b8feeb837f3d5052';
+  const SUPPLIER_KEY = 'zakup_suppliers_v2';
+  const SUPPLIER_TTL = 7 * 24 * 60 * 60 * 1000;
   const CACHE_KEY = 'zakup_stock_v2';
   const PLAN_KEY = 'zakup_plan_v1';
   const FRESH_MS = 60 * 1000;
@@ -441,6 +564,12 @@ input::placeholder{color:#4d5a6c}
   let loading = false;
   let toastTimer = 0;
   let aiOffset = 0;
+  let sellWeeks = 4;
+  let suppliers = {};
+  const supplierPending = new Set();
+  const supplierQueue = [];
+  const supplierQuery = {};
+  let supplierBusy = 0;
 
   function applyInsets() {
     if (!tg) return;
@@ -505,6 +634,86 @@ input::placeholder{color:#4d5a6c}
     return STORE_URL + String(first).replace(/^\.?\//, '');
   }
 
+  const CATS = {
+    headphones: { label: 'Аудио', color: '#4ade80' },
+    watches: { label: 'Часы', color: '#60a5fa' },
+    glasses: { label: 'Очки', color: '#fbbf24' },
+    phone: { label: 'Аксессуары', color: '#a78bfa' },
+    other: { label: 'Другое', color: '#94a3b8' }
+  };
+  const catOf = (key) => CATS[String(key || '').toLowerCase()] || CATS.other;
+
+  function renderStockCharts() {
+    const total = stock.reduce((s, p) => s + p.price * p.qty, 0);
+    const groups = {};
+    stock.forEach((p) => {
+      const v = p.price * p.qty;
+      if (!(v > 0)) return;
+      const key = String(p.category || '').toLowerCase();
+      const safe = CATS[key] ? key : 'other';
+      groups[safe] = (groups[safe] || 0) + v;
+    });
+    const cats = Object.keys(groups)
+      .map((key) => ({ key, value: groups[key], label: catOf(key).label, color: catOf(key).color }))
+      .sort((a, b) => b.value - a.value);
+
+    const donut = $('#stockDonut');
+    if (donut) {
+      if (total > 0 && cats.length) {
+        let acc = 0;
+        const stops = cats.map((c) => {
+          const from = acc;
+          acc += (c.value / total) * 100;
+          return c.color + ' ' + from.toFixed(2) + '% ' + acc.toFixed(2) + '%';
+        });
+        donut.style.background = 'conic-gradient(' + stops.join(', ') + ')';
+      } else {
+        donut.style.background = '#1b2330';
+      }
+    }
+
+    const dt = $('#donutTotal');
+    if (dt) dt.textContent = total > 0 ? fmt(total) : '0 ₽';
+
+    const legend = $('#stockLegend');
+    if (legend) {
+      legend.innerHTML = cats.length
+        ? cats.map((c) => '<div class="legend-row"><i style="background:' + c.color + '"></i><span>' + c.label + '</span><b>' + fmt(c.value) + '<em>' + Math.round((c.value / total) * 100) + '%</em></b></div>').join('')
+        : '<div class="ai-empty">Пока нет товаров с остатком.</div>';
+    }
+
+    const bars = $('#stockBars');
+    if (bars) {
+      const rows = stock.filter((p) => p.price * p.qty > 0).sort((a, b) => b.price * b.qty - a.price * a.qty);
+      const max = rows.length ? rows[0].price * rows[0].qty : 1;
+      bars.innerHTML = rows.length
+        ? rows.map((p) => {
+            const v = p.price * p.qty;
+            const c = catOf(p.category);
+            return '<div class="bar-row">' +
+              '<div class="bar-top"><span>' + esc(p.title) + ' <em>' + fmtN(p.qty) + ' шт</em></span><b>' + fmt(v) + '</b></div>' +
+              '<div class="bar-track"><i style="width:' + Math.max(2, (v / max) * 100).toFixed(1) + '%;background:' + c.color + '"></i></div>' +
+            '</div>';
+          }).join('')
+        : '<div class="ai-empty">Нет позиций с остатком — склад пуст.</div>';
+    }
+
+    const insights = $('#stockInsights');
+    if (insights) {
+      const inStock = stock.filter((p) => p.qty > 0);
+      const out = stock.filter((p) => p.qty === 0);
+      const priced = stock.filter((p) => p.price > 0);
+      const avg = priced.length ? priced.reduce((s, p) => s + p.price, 0) / priced.length : 0;
+      const top = stock.slice().sort((a, b) => b.price * b.qty - a.price * a.qty)[0];
+      const topShare = total > 0 && top ? (top.price * top.qty / total) * 100 : 0;
+      insights.innerHTML =
+        '<div class="insight"><span>Позиций в наличии</span><b>' + inStock.length + ' / ' + stock.length + '</b></div>' +
+        '<div class="insight"><span>Без остатка</span><b class="' + (out.length ? 'amber' : 'green') + '">' + out.length + ' поз.</b></div>' +
+        '<div class="insight"><span>Средняя цена</span><b>' + (avg > 0 ? fmt(avg) : '—') + '</b></div>' +
+        '<div class="insight"><span title="' + esc(top ? top.title : '') + '">Топ-позиция</span><b>' + (topShare > 0 ? Math.round(topShare) + '%' : '—') + '</b></div>';
+    }
+  }
+
   function setTab(tab) {
     $$('.tab').forEach((t) => {
       const on = t.dataset.tab === tab;
@@ -517,6 +726,18 @@ input::placeholder{color:#4d5a6c}
   }
 
   $$('.tab').forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
+
+  const sellSeg = $('#sellOffSeg');
+  if (sellSeg) {
+    sellSeg.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-weeks]');
+      if (!b) return;
+      sellWeeks = Math.max(1, Math.round(num(b.dataset.weeks))) || 4;
+      $$('[data-weeks]', sellSeg).forEach((x) => x.classList.toggle('on', x === b));
+      renderSellOff(planTotals());
+      haptic();
+    });
+  }
 
   /* ---------- склад ---------- */
 
@@ -634,6 +855,8 @@ input::placeholder{color:#4d5a6c}
       src.classList.toggle('manager', managerOk);
       src.innerHTML = '<i></i> ' + (managerOk ? 'менеджер' : 'сайт');
     }
+
+    renderStockCharts();
     $('#stockChips').innerHTML = stock.length
       ? '<span class="chip-stat"><b>' + inStock + '</b> в наличии</span>' +
         '<span class="chip-stat"><b>' + fmtN(units) + '</b> шт</span>' +
@@ -703,11 +926,12 @@ input::placeholder{color:#4d5a6c}
     const revenue = price * sold;      // продаём всё, кроме витринной
     const profit = revenue - invested; // чистая прибыль
     const roi = invested > 0 ? (profit / invested) * 100 : 0;
-    return { qty, sold, cost, price, invested, showcase, revenue, profit, roi };
+    const breakEven = price > 0 ? Math.ceil(invested / price) : 0;
+    return { qty, sold, cost, price, invested, showcase, revenue, profit, roi, breakEven };
   }
 
-  function renderPlan() {
-    const t = plan.reduce((acc, it) => {
+  function planTotals() {
+    return plan.reduce((acc, it) => {
       const c = itemCalc(it);
       acc.invested += c.invested;
       acc.showcase += c.showcase;
@@ -715,8 +939,13 @@ input::placeholder{color:#4d5a6c}
       acc.profit += c.profit;
       acc.sold += c.sold;
       acc.qty += c.qty;
+      acc.breakEven += c.breakEven;
       return acc;
-    }, { invested: 0, showcase: 0, rev: 0, profit: 0, sold: 0, qty: 0 });
+    }, { invested: 0, showcase: 0, rev: 0, profit: 0, sold: 0, qty: 0, breakEven: 0 });
+  }
+
+  function renderPlan() {
+    const t = planTotals();
 
     const profitEl = $('#planProfit');
     profitEl.textContent = fmt(t.profit);
@@ -730,6 +959,9 @@ input::placeholder{color:#4d5a6c}
       ? 'Продаём ' + fmtN(t.sold) + ' из ' + fmtN(t.qty) + ' шт · на витрине ' + fmt(t.showcase)
       : 'Выручка минус вложения. Одна штука с каждой позиции остаётся на витрине';
     $('#clearPlan').style.display = plan.length ? '' : 'none';
+
+    renderPlanChart(t);
+    renderSellOff(t);
 
     const host = $('#planList');
     if (!plan.length) {
@@ -761,6 +993,114 @@ input::placeholder{color:#4d5a6c}
     }).join('');
 
     renderAI();
+  }
+
+  function renderPlanChart(t) {
+    const bars = $('#planBars');
+    const scale = Math.max(t.invested, t.rev, Math.abs(t.profit), 1);
+    const row = (label, value, cls) => {
+      const w = value === 0 ? 0 : Math.max(2, (Math.abs(value) / scale) * 100);
+      return '<div class="bar-row">' +
+        '<div class="bar-top"><span>' + label + '</span><b>' + (value < 0 ? '−' : '') + fmt(Math.abs(value)) + '</b></div>' +
+        '<div class="bar-track"><i class="' + cls + '" style="width:' + w.toFixed(1) + '%"></i></div>' +
+      '</div>';
+    };
+
+    if (bars) {
+      bars.innerHTML = plan.length
+        ? row('Вложить', t.invested, 'blue') + row('Выручка', t.rev, '') + row('Чистая прибыль', t.profit, t.profit >= 0 ? '' : 'red')
+        : '<div class="ai-empty">Добавьте позиции — покажу вложения, выручку и прибыль.</div>';
+    }
+
+    const label = $('#planBreakEven');
+    const bar = $('#planBreakEvenBar');
+    const note = $('#planBreakEvenNote');
+    if (!label || !bar || !note) return;
+
+    if (!plan.length) {
+      label.textContent = '—';
+      bar.style.width = '0%';
+      bar.className = '';
+      note.textContent = 'Добавьте позиции в план — посчитаю, после какой продажи он окупится.';
+      return;
+    }
+
+    const be = t.breakEven;
+    const pct = be > 0 ? Math.min(100, (t.sold / be) * 100) : 100;
+    label.textContent = be + ' продаж';
+    bar.style.width = Math.max(2, pct).toFixed(1) + '%';
+    bar.className = t.sold >= be ? '' : 'amber';
+    note.textContent = t.sold >= be
+      ? 'План окупается: продаём ' + fmtN(t.sold) + ' шт, нужно ' + be + '.'
+      : 'Нужно продать ' + be + ' шт, в плане ' + fmtN(t.sold) + '. Витрина остаётся в запасе.';
+  }
+
+  function renderSellOff(t) {
+    const bars = $('#sellOffBars');
+    const rate = $('#sellOffRate');
+    const note = $('#sellOffNote');
+    const list = $('#sellOffList');
+    if (!bars || !rate || !note || !list) return;
+
+    const weeks = sellWeeks;
+    const totalSold = plan.reduce((s, it) => s + itemCalc(it).sold, 0);
+    const invested = plan.reduce((s, it) => s + itemCalc(it).invested, 0);
+
+    if (!plan.length || totalSold <= 0) {
+      bars.innerHTML = '<div class="ai-empty">' + (plan.length
+        ? 'В плане нет товара к продаже: добавьте количество больше 1 — одна штука остаётся на витрине.'
+        : 'Добавьте позиции в план — покажу, как товар уходит по неделям.') + '</div>';
+      rate.textContent = '—';
+      note.textContent = 'Прогноз строится по вашему плану при равномерных продажах.';
+      list.innerHTML = '';
+      return;
+    }
+
+    const perWeek = totalSold / weeks;
+    const rateText = '~' + (perWeek < 1 ? perWeek.toFixed(1) : Math.round(perWeek)) + ' шт/нед';
+    rate.textContent = rateText;
+
+    const rows = plan.map((it) => ({ name: it.name, c: itemCalc(it) }));
+    const remainTotal = [];
+    let cumTotal = 0;
+    const weekData = [];
+    for (let w = 1; w <= weeks; w++) {
+      let rev = 0;
+      rows.forEach(({ c }) => {
+        const per = c.sold / weeks;
+        const cum = Math.min(c.sold, Math.round(per * w));
+        rev += c.price * cum;
+      });
+      cumTotal = Math.min(totalSold, Math.round((totalSold / weeks) * w));
+      remainTotal.push(totalSold - cumTotal);
+      weekData.push({ w, rev, profit: rev - invested, remain: totalSold - cumTotal });
+    }
+
+    const max = totalSold || 1;
+    bars.innerHTML = weekData.map((d) => {
+      const w = Math.max(2, (d.remain / max) * 100);
+      const cls = d.profit >= 0 ? '' : 'blue';
+      return '<div class="bar-row">' +
+        '<div class="bar-top"><span>Неделя ' + d.w + '</span><b>' + fmtN(d.remain) + ' шт · ' + (d.profit < 0 ? '−' : '+') + fmt(Math.abs(d.profit)) + '</b></div>' +
+        '<div class="bar-track"><i class="' + cls + '" style="width:' + w.toFixed(1) + '%"></i></div>' +
+      '</div>';
+    }).join('');
+
+    const payWeek = weekData.find((d) => d.profit >= 0);
+    if (payWeek) {
+      note.textContent = 'Окупаемость на ' + payWeek.w + '-й неделе. К концу горизонта чистая прибыль ' + fmt(weekData[weekData.length - 1].profit) + '.';
+    } else {
+      const need = Math.ceil(t.breakEven / weeks);
+      note.textContent = 'За ' + weeks + ' нед. не окупается: нужно ~' + Math.max(1, need) + ' шт/нед. Прибыль к концу горизонта ' + fmt(weekData[weekData.length - 1].profit) + '.';
+    }
+
+    list.innerHTML = rows.map(({ name, c }) => {
+      const per = c.sold / weeks;
+      const perText = c.sold ? '~' + (per < 1 ? per.toFixed(1) : Math.round(per)) + '/нед' : 'витрина';
+      const pay = c.sold >= c.breakEven ? 'окун. за ' + c.breakEven : 'не окупается';
+      return '<div class="selloff-row"><span class="nm" title="' + esc(name) + '">' + esc(name) + '</span>' +
+        '<b>' + fmtN(c.sold) + ' шт</b><span class="wk">' + perText + ' · ' + pay + '</span></div>';
+    }).join('');
   }
 
   function updatePreview() {
@@ -823,60 +1163,80 @@ input::placeholder{color:#4d5a6c}
       id: 'audio', label: 'аудио', icon: '🎧',
       re: /airpods|наушник|ebud|earbud|tws|headphone|гарнитур|аудио|звук/i,
       cat: /headphone|audio/i,
+      shop: { name: 'Paradise Store', slug: 'paradise' },
       seeds: [
-        'Наушники TWS с активным шумоподавлением',
-        'Беспроводные наушники с зарядным кейсом',
-        'Накладные Bluetooth-наушники',
-        'Спортивные наушники с крючком',
-        'Проводная гарнитура USB-C'
+        { n: 'Наушники TWS с активным шумоподавлением', q: 'наушники TWS' },
+        { n: 'Беспроводные наушники с зарядным кейсом', q: 'беспроводные наушники' },
+        { n: 'Накладные Bluetooth-наушники', q: 'Bluetooth наушники', m: /bluetooth/i },
+        { n: 'Спортивные наушники с крючком', q: 'наушники', m: /спорт|sport|бег|фитнес/i },
+        { n: 'Проводная гарнитура USB-C', q: 'гарнитура', m: /гарнитур|наушник/i },
+        { n: 'Наушники с прозрачным режимом', q: 'наушники', m: /наушник|tws|pods/i },
+        { n: 'Игровая гарнитура с микрофоном', q: 'игровая гарнитура', m: /игров|gaming|ps[45]|xbox/i },
+        { n: 'Сменные амбушюры для TWS', q: 'TWS', m: /амбушюр|насадк|вкладыш/i }
       ]
     },
     {
       id: 'watch', label: 'часы', icon: '⌚',
       re: /watch|час[ыа]|smartwatch|браслет|ремеш|фитнес/i,
       cat: /watch|wearable/i,
+      shop: { name: 'BM OPT', slug: 'bm-market' },
       seeds: [
-        'Умные часы с AMOLED-экраном',
-        'Фитнес-браслет с пульсометром',
-        'Набор ремешков для Apple Watch',
-        'Защитное стекло для умных часов',
-        'Беспроводная зарядка для часов'
+        { n: 'Умные часы с AMOLED-экраном', q: 'умные часы' },
+        { n: 'Фитнес-браслет с пульсометром', q: 'фитнес браслет' },
+        { n: 'Набор ремешков для Apple Watch', q: 'ремешок', m: /watch|час/i },
+        { n: 'Защитное стекло для умных часов', q: 'защитное стекло', m: /час|watch/i },
+        { n: 'Беспроводная зарядка для часов', q: 'зарядка', m: /час|watch/i },
+        { n: 'Умные часы с GPS и звонками', q: 'часы', m: /час|watch/i },
+        { n: 'Спортивные часы с влагозащитой', q: 'часы', m: /час|watch/i },
+        { n: 'Подставка-зарядка для часов', q: 'подставка', m: /час|watch/i }
       ]
     },
     {
       id: 'glasses', label: 'очки', icon: '🕶',
       re: /ray-?ban|очк|glasses|vision|оправ/i,
       cat: /glasses/i,
+      shop: { name: 'Like Opt', slug: 'like_opt' },
       seeds: [
-        'Умные очки с камерой и Bluetooth',
-        'Солнцезащитные очки Polarized',
-        'Очки с открытыми динамиками',
-        'Сменные линзы для умных очков',
-        'Жёсткий чехол для очков'
+        { n: 'Умные очки с камерой и Bluetooth', q: 'очки', m: /умн|smart|камер|bluetooth|динамик|видео/i },
+        { n: 'Солнцезащитные очки Polarized', q: 'солнцезащитные очки', m: /солнцезащ|polar|uv/i },
+        { n: 'Очки с открытыми динамиками', q: 'очки', m: /динамик|bluetooth|аудио/i },
+        { n: 'Сменные линзы для умных очков', q: 'линзы', m: /очк|glass/i },
+        { n: 'Жёсткий чехол для очков', q: 'чехол для очков' },
+        { n: 'Очки с функцией записи видео', q: 'очки', m: /видео|камер/i },
+        { n: 'Спортивные очки с зеркальными линзами', q: 'очки', m: /спорт|вело|лыж|бег/i },
+        { n: 'Антибликовые очки для работы', q: 'очки', m: /антиблик|компьютерн/i }
       ]
     },
     {
       id: 'phone', label: 'аксессуары', icon: '📱',
       re: /iphone|айфон|смартфон|телефон|чехол|стекл|magsafe|кабел|зарядк|power ?bank|адаптер/i,
       cat: /^(phone|accessor|charger|cable)/i,
+      shop: { name: 'Make Money', slug: 'make%20money%20store' },
       seeds: [
-        'Чехол MagSafe с прозрачным корпусом',
-        'Защитное стекло 9H с рамкой',
-        'Кабель USB-C на 60 Вт',
-        'Power bank 10 000 мАч',
-        'Автомобильный держатель с MagSafe'
+        { n: 'Чехол MagSafe с прозрачным корпусом', q: 'чехол MagSafe', m: /magsafe|iphone|айфон/i },
+        { n: 'Защитное стекло 9H с рамкой', q: 'защитное стекло' },
+        { n: 'Кабель USB-C на 60 Вт', q: 'кабель USB-C' },
+        { n: 'Power bank 10 000 мАч', q: 'power bank' },
+        { n: 'Автомобильный держатель с MagSafe', q: 'держатель MagSafe' },
+        { n: 'Сетевое зарядное устройство 30 Вт', q: 'зарядное устройство' },
+        { n: 'Кабель с магнитным разъёмом', q: 'кабель', m: /магнит/i },
+        { n: 'Органайзер для кабелей', q: 'органайзер', m: /кабел|провод/i }
       ]
     },
     {
       id: 'gadget', label: 'гаджеты', icon: '✨',
       re: /колонк|speaker|камер|gopro|трекер|ламп|умн|гаджет/i,
       cat: /speaker|gadget|smart/i,
+      shop: { name: 'BM OPT', slug: 'bm-market' },
       seeds: [
-        'Портативная Bluetooth-колонка',
-        'Умная лампа с Wi-Fi',
-        'GPS-трекер для ключей',
-        'Мини-проектор для телефона',
-        'Беспроводная зарядная станция 3-в-1'
+        { n: 'Портативная Bluetooth-колонка', q: 'Bluetooth колонка' },
+        { n: 'Умная лампа с Wi-Fi', q: 'лампа', m: /лампа|светильник|ночник/i },
+        { n: 'GPS-трекер для ключей', q: 'трекер', m: /трекер|find ?my|gps/i },
+        { n: 'Мини-проектор для телефона', q: 'проектор', m: /проектор.*(wi-?fi|4k|hdmi|мини|телефон)|(wi-?fi|4k|hdmi|мини|телефон).*проектор/i },
+        { n: 'Беспроводная зарядная станция 3-в-1', q: 'зарядная станция', m: /3 ?в ?1|3-в-1|беспроводн|magsafe|apple|iphone/i },
+        { n: 'Умная розетка с таймером', q: 'розетка', m: /розетк|smart|wi-?fi/i },
+        { n: 'Экшн-камера с водозащитой', q: 'экшн камера', m: /экшн|action|4k|камер/i },
+        { n: 'Настольная лампа с беспроводной зарядкой', q: 'лампа', m: /настольн|led|ламп/i }
       ]
     }
   ];
@@ -884,10 +1244,8 @@ input::placeholder{color:#4d5a6c}
   function aiSuggestions() {
     const sources = [];
     plan.forEach((it) => sources.push({ name: it.name, category: '', fromPlan: true }));
-    if (!plan.length) {
-      stock.slice().sort((a, b) => a.qty - b.qty).forEach((p) => sources.push({ name: p.title, category: p.category }));
-    }
     stock.filter((p) => p.qty === 0).forEach((p) => sources.push({ name: p.title, category: p.category, out: true }));
+    stock.filter((p) => p.qty > 0).forEach((p) => sources.push({ name: p.title, category: p.category }));
 
     const tags = [];
     AI_RULES.forEach((rule) => {
@@ -902,21 +1260,24 @@ input::placeholder{color:#4d5a6c}
     const pools = tags.map(({ rule, basedOn, out, fromPlan }) => {
       const off = aiOffset % rule.seeds.length;
       const seeds = rule.seeds.slice(off).concat(rule.seeds.slice(0, off));
-      return { rule, basedOn, out, fromPlan, names: seeds.filter((n) => !inPlan(n)) };
-    }).filter((p) => p.names.length);
+      return { rule, basedOn, out, fromPlan, seeds: seeds.filter((s) => !inPlan(s.n)) };
+    }).filter((p) => p.seeds.length);
 
     const items = [];
     const seen = new Set();
     let round = 0;
-    while (items.length < 5 && pools.some((p) => p.names.length > round)) {
+    while (items.length < 5 && pools.some((p) => p.seeds.length > round)) {
       pools.forEach((pool) => {
         if (items.length >= 5) return;
-        const name = pool.names[round];
-        if (!name || seen.has(name)) return;
-        seen.add(name);
+        const seed = pool.seeds[round];
+        if (!seed || seen.has(seed.n)) return;
+        seen.add(seed.n);
         items.push({
-          name,
+          name: seed.n,
+          q: seed.q,
+          must: seed.m,
           icon: pool.rule.icon,
+          shop: pool.rule.shop,
           reason: pool.out
             ? 'закончилось на складе · ' + pool.rule.label
             : pool.fromPlan
@@ -929,27 +1290,173 @@ input::placeholder{color:#4d5a6c}
     return items;
   }
 
+  function readSupplierCache() {
+    try {
+      const c = JSON.parse(localStorage.getItem(SUPPLIER_KEY) || '{}');
+      if (c && typeof c === 'object' && !Array.isArray(c)) suppliers = c;
+    } catch (_) { suppliers = {}; }
+  }
+
+  function writeSupplierCache() {
+    try {
+      const cut = Date.now() - SUPPLIER_TTL;
+      const out = {};
+      Object.keys(suppliers).forEach((k) => {
+        const v = suppliers[k];
+        if (v && num(v.at) > cut) out[k] = v;
+      });
+      suppliers = out;
+      localStorage.setItem(SUPPLIER_KEY, JSON.stringify(out));
+    } catch (_) {}
+  }
+
+  // Ищем конкретный товар у конкретного поставщика Wikkeo (не поиск).
+  async function fetchSupplier(name, query, must) {
+    const q = query || name;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 7000);
+    try {
+      const res = await fetch(WIKKEO_API + '/v1/products?search=' + encodeURIComponent(q) + '&limit=20', { signal: ctrl.signal });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const list = (data && data.items) || [];
+      const words = String(q).toLowerCase().split(/[^a-zа-яё0-9]+/i).filter((w) => w.length > 2);
+      const stem = (w) => (w.length > 5 ? w.slice(0, w.length - 2) : w);
+      let best = null;
+      let bestScore = -1;
+      list.forEach((p) => {
+        if (!p || !p.slug || !p.shop || !p.shop.slug) return;
+        if (p.isActive === false || p.isAvailable === false || p.shop.isActive === false) return;
+        if (must && !must.test(String(p.name || ''))) return;
+        const pn = String(p.name || '').toLowerCase();
+        const tokens = pn.split(/[^a-zа-яё0-9]+/i).filter(Boolean);
+        let rel = 0;
+        words.forEach((w) => {
+          const st = stem(w);
+          if (tokens.some((t) => t.startsWith(st))) rel += 3;
+        });
+        if (!rel) return;
+        let score = rel;
+        score += Math.min(8, Math.log10(1 + Math.max(0, num(p.salesCount))) * 3);
+        score += Math.min(4, num(p.rating));
+        if (p.shop.isVerified) score += 4;
+        score += Math.min(4, Math.log10(1 + Math.max(0, num(p.shop.ordersCount))));
+        if (score > bestScore) { bestScore = score; best = p; }
+      });
+      if (!best) return null;
+      return {
+        name: best.name,
+        url: 'https://wikkeo.com/item/' + best.slug,
+        shop: best.shop.name,
+        shopUrl: 'https://wikkeo.com/store/' + best.shop.slug,
+        rating: num(best.shop.rating),
+        orders: num(best.shop.ordersCount),
+        at: Date.now()
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function pumpSuppliers() {
+    while (supplierBusy < 2 && supplierQueue.length) {
+      const name = supplierQueue.shift();
+      const meta = supplierQuery[name] || { q: name, m: null };
+      supplierBusy += 1;
+      fetchSupplier(name, meta.q, meta.m).then((r) => {
+        suppliers[name] = r || { failed: true, at: Date.now() };
+      }).catch(() => {
+        suppliers[name] = { failed: true, at: Date.now() };
+      }).then(() => {
+        supplierBusy -= 1;
+        supplierPending.delete(name);
+        writeSupplierCache();
+        renderAI();
+        pumpSuppliers();
+      });
+    }
+  }
+
+  function resolveSuppliers(items) {
+    let added = false;
+    items.forEach((s) => {
+      const name = s.name;
+      supplierQuery[name] = { q: s.q || name, m: s.must || null };
+      const c = suppliers[name];
+      if (c && Date.now() - num(c.at) < SUPPLIER_TTL) return;
+      if (supplierPending.has(name)) return;
+      supplierPending.add(name);
+      supplierQueue.push(name);
+      added = true;
+    });
+    if (added) pumpSuppliers();
+  }
+
+  function aiSummaryHtml() {
+    if (!plan.length) {
+      return { html: '<b>План пуст.</b> Возьму остатки склада и подберу похожие позиции. Добавьте товар — посчитаю чистую прибыль, окупаемость и план ухода.', warn: false };
+    }
+    const t = planTotals();
+    const out = stock.filter((p) => p.qty === 0).length;
+    const best = plan
+      .map((it) => ({ it, c: itemCalc(it) }))
+      .filter((x) => x.c.invested > 0)
+      .sort((a, b) => b.c.roi - a.c.roi)[0];
+    let html = '<b>' + plan.length + ' поз.</b> · прибыль <b>' + fmt(t.profit) + '</b> · окупаемость <b>' + t.breakEven + ' продаж</b>';
+    if (t.sold > 0) html += ' · темп <b>~' + Math.max(1, Math.round(t.sold / sellWeeks)) + ' шт/нед</b>';
+    if (out) html += '. Без остатка: <b>' + out + '</b> — учтены в подборе';
+    let warn = false;
+    if (t.profit < 0) {
+      warn = true;
+      html += '. План убыточный: поднимите цену или снизьте закупку';
+    } else if (best && best.c.roi > 0) {
+      html += '. Лучшая маржа: <b>' + esc(best.it.name) + '</b> (' + Math.round(best.c.roi) + '%)';
+    }
+    return { html: html + '.', warn };
+  }
+
   function renderAI() {
     const host = $('#aiList');
     if (!host) return;
+    const summary = $('#aiSummary');
+    if (summary) {
+      const s = aiSummaryHtml();
+      summary.className = 'ai-summary' + (s.warn ? ' warn' : '');
+      summary.innerHTML = s.html;
+    }
     const items = aiSuggestions();
     if (!items.length) {
       host.innerHTML = '<div class="ai-empty">Добавьте товар в план — подберу похожие позиции для закупа.</div>';
       return;
     }
-    host.innerHTML = items.map((s) =>
-      '<div class="ai-item">' +
+    resolveSuppliers(items);
+    host.innerHTML = items.map((s) => {
+      const sup = suppliers[s.name];
+      const live = sup && !sup.failed && sup.url;
+      const shop = live ? sup.shop : (s.shop ? s.shop.name : 'Wikkeo');
+      const shopUrl = live ? sup.shopUrl : (s.shop ? 'https://wikkeo.com/store/' + s.shop.slug : '');
+      const productUrl = live ? sup.url : shopUrl;
+      const star = live && num(sup.rating) > 0 ? '<span class="star">★ ' + num(sup.rating).toFixed(1) + '</span>' : '';
+      const supplier = shopUrl
+        ? '<span class="ai-supplier"><a href="' + esc(shopUrl) + '" target="_blank" rel="noopener">' + esc(shop) + '</a>' + star + '</span>'
+        : '';
+      const pending = !sup ? '<span class="ai-loading">Ищу поставщика…</span>' : supplier;
+      const link = productUrl
+        ? '<a class="ai-link" href="' + esc(productUrl) + '" target="_blank" rel="noopener">' + (live ? 'Товар ↗' : 'Магазин ↗') + '</a>'
+        : '';
+      return '<div class="ai-item">' +
         '<div class="ai-ico">' + s.icon + '</div>' +
         '<div class="ai-main">' +
           '<div class="ai-name" title="' + esc(s.name) + '">' + esc(s.name) + '</div>' +
           '<div class="ai-bottom">' +
-            '<span class="ai-reason">' + esc(s.reason) + '</span>' +
-            '<a class="ai-link" href="' + esc(WIKKEO_URL + encodeURIComponent(s.name)) + '" target="_blank" rel="noopener">Wikkeo ↗</a>' +
+            '<span class="ai-reason' + (s.reason.indexOf('закончилось') === 0 ? ' warn' : '') + '">' + esc(s.reason) + '</span>' +
+            pending +
+            link +
           '</div>' +
         '</div>' +
         '<button class="ai-add" data-ai="' + esc(s.name) + '" title="Подставить в план" aria-label="Подставить ' + esc(s.name) + '">+</button>' +
-      '</div>'
-    ).join('');
+      '</div>';
+    }).join('');
   }
 
   /* ---------- события ---------- */
@@ -1040,6 +1547,7 @@ input::placeholder{color:#4d5a6c}
 
   readPlan();
   readCache();
+  readSupplierCache();
   renderPlan();
   if (stock.length) renderStock();
   updatePreview();
